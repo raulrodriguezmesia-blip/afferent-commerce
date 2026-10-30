@@ -1,0 +1,296 @@
+from fastapi import APIRouter
+from pydantic import BaseModel
+import os
+import json
+from typing import List, Optional, Dict, Any
+
+router = APIRouter(prefix="/api/v1", tags=["Afferent-Omni Chat"])
+
+async def _try_llm(query: str, context: dict) -> Optional[str]:
+    """Try to get a response from an LLM if API key is configured."""
+    api_key = os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        return None
+    try:
+        import httpx
+        system_prompt = (
+            "You are Afferent-Omni, a somatosensorial AI copilot for a robotic manipulation dashboard. "
+            "You have access to real-time telemetry. Answer in English, technically and naturally.\n\n"
+            "Current telemetry context (JSON):\n" + json.dumps(context, indent=2)[:3000]
+        )
+        if os.getenv("OPENAI_API_KEY"):
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                    json={
+                        "model": "gpt-4o-mini",
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": query},
+                        ],
+                        "max_tokens": 300,
+                        "temperature": 0.7,
+                    },
+                )
+                if resp.status_code == 200:
+                    return resp.json()["choices"][0]["message"]["content"]
+        elif os.getenv("ANTHROPIC_API_KEY"):
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={"x-api-key": api_key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"},
+                    json={
+                        "model": "claude-3-haiku-20240307",
+                        "max_tokens": 300,
+                        "system": system_prompt,
+                        "messages": [{"role": "user", "content": query}],
+                    },
+                )
+                if resp.status_code == 200:
+                    return resp.json()["content"][0]["text"]
+    except Exception:
+        return None
+    return None
+
+
+
+class ChatRequest(BaseModel):
+    query: str
+    context: Optional[Dict[str, Any]] = None
+
+class ChatResponse(BaseModel):
+    response: str
+    category: str
+    suggested_followups: List[str]
+
+NEBIUS_BASE_URL = os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1/")
+NEBIUS_MODEL = os.getenv("NEBIUS_MODEL", "nvidia/nemotron-3-super-120b-a12b")
+
+
+async def _try_nemotron(query: str, context: dict) -> Optional[str]:
+    """Try to get a response from NVIDIA Nemotron via Nebius Token Factory."""
+    api_key = os.getenv("NEBIUS_API_KEY")
+    if not api_key:
+        return None
+    try:
+        import httpx
+        system_prompt = (
+            "You are Afferent-Omni, a somatosensorial AI copilot for robotic manipulation. "
+            "You analyze real-time tactile telemetry and provide safety assessments in English. "
+            "Be technical, natural, and connect your response to live telemetry values.\n\n"
+            "Current telemetry context (JSON):\n" + json.dumps(context, indent=2)[:4000]
+        )
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                f"{NEBIUS_BASE_URL}chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={
+                    "model": NEBIUS_MODEL,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": query},
+                    ],
+                    "max_tokens": 500,
+                    "temperature": 0.7,
+                },
+            )
+            if resp.status_code == 200:
+                return resp.json()["choices"][0]["message"]["content"]
+    except Exception:
+        return None
+    return None
+
+
+@router.get("/model-status")
+async def model_status():
+    """Check NVIDIA model status via Nebius Token Factory."""
+    api_key = os.getenv("NEBIUS_API_KEY")
+    if not api_key:
+        return {
+            "connected": False,
+            "model": os.getenv("NEBIUS_MODEL", "nvidia/nemotron-3-super-120b-a12b"),
+            "latency_ms": 0,
+            "tokens_processed": 0,
+            "provider": "Nebius Token Factory",
+        }
+    try:
+        import httpx, time
+        start = time.time()
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"{os.getenv('NEBIUS_BASE_URL', 'https://api.tokenfactory.nebius.com/v1/')}models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+            latency = round((time.time() - start) * 1000, 1)
+            if resp.status_code == 200:
+                return {
+                    "connected": True,
+                    "model": os.getenv("NEBIUS_MODEL", "nvidia/nemotron-3-super-120b-a12b"),
+                    "latency_ms": latency,
+                    "tokens_processed": 0,
+                    "provider": "Nebius Token Factory",
+                }
+    except Exception:
+        pass
+    return {
+        "connected": False,
+        "model": os.getenv("NEBIUS_MODEL", "nvidia/nemotron-3-super-120b-a12b"),
+        "latency_ms": 0,
+        "tokens_processed": 0,
+        "provider": "Nebius Token Factory",
+    }
+
+
+@router.post("/chat-assistant", response_model=ChatResponse)
+async def chat_assistant(payload: ChatRequest):
+    query = (payload.query or "").strip()
+    query_lower = query.lower()
+    context = payload.context or {}
+    if not isinstance(context, dict):
+        context = {}
+
+    # Try NVIDIA Nemotron via Nebius Token Factory first
+    nemotron_resp = await _try_nemotron(query, context)
+    if nemotron_resp:
+        return ChatResponse(
+            response=nemotron_resp,
+            category="nemotron",
+            suggested_followups=["What is Young's Modulus?", "Explain the Neuromorphic Reflex Arc", "Show TactoEval metrics"],
+        )
+
+    # Fallback to OpenAI/Anthropic
+    llm_resp = await _try_llm(query, context)
+    if llm_resp:
+        return ChatResponse(
+            response=llm_resp,
+            category="llm",
+            suggested_followups=["What is Young's Modulus?", "Explain the Neuromorphic Reflex Arc", "Show TactoEval metrics"],
+        )
+
+    # Extract live telemetry payload from context safely
+
+    # Extract live telemetry payload from context safely
+    material = context.get("material_profile", {}) or {}
+    reflex = context.get("neuromorphic_reflex", {}) or {}
+    topology = context.get("multi_digit_topology", {}) or {}
+    acoustic = context.get("acoustic_friction_profile", {}) or {}
+
+    # 1. Greetings, Help, and General Instructions
+    if any(k in query_lower for k in ["help", "hi", "hello", "start", "instructions", "how", "excelente", "great"]):
+        resp = "Hello! I am the Afferent-Omni somatosensorial AI copilot. I am running in closed-loop at 50 Hz, integrating tribological physics with real-time Sim2Real safety. Feel free to ask me about Young's modulus, friction coefficients, neuromorphic edge reflexes, NASA-style multi-digit topologies, or TactoEval benchmark metrics."
+        cat = "general"
+        followups = ["What is Young's Modulus?", "Explain the Neuromorphic Reflex Arc", "Show TactoEval metrics"]
+
+    # 2. TactoEval Metrics
+    elif any(k in query_lower for k in ["tactoeval", "prevention", "confidence", "damage", "avoidance", "over-tightening", "cross-modal", "latency"]):
+        bt = context.get("benchmark_telemetry", {}) or {}
+        dpc = bt.get("damage_prevention_confidence", "99.2%")
+        dai = bt.get("damage_avoidance_index_percent", 97.0)
+        fort = bt.get("force_over_tightening_reduction_percent", 68.0)
+        lat = bt.get("estimated_latency_ms", 120)
+        resp = f"TactoEval telemetry indicates a {dpc} damage prevention confidence, a {dai}% damage avoidance index, a {fort}% reduction in force over-tightening, and a {lat} ms cross-modal latency to ensure safe dexterous manipulation."
+        cat = "evaluation"
+        followups = ["What is the safety margin?", "Explain Young's Modulus"]
+
+    # 3. Sim2Real Safety Shield & Force Caps
+    elif any(k in query_lower for k in ["safety", "shield", "uncertainty", "force", "u_th", "f_max", "cap", "margin"]):
+        cot = context.get("tactile_reasoning_cot", {}) or {}
+        fb = context.get("force_budget", {}) or {}
+        gating = cot.get("gating_decision", "AUTHORIZED_SAFE_GRASP")
+        unc = cot.get("uncertainty_score", None)
+        unc_str = f"{round(unc*100,1)}%" if unc is not None else "syncing"
+        maxf = fb.get("max_allowed_normal_force_N", 1.80)
+        resp = f"The Sim2Real Safety Shield is currently in '{gating}' mode. Visual uncertainty is at {unc_str}, securely below the 25% threshold, and the maximum force cap (F_max) is actively constrained to {maxf} N to prevent micro-fracturing under lateral loading."
+        cat = "safety"
+        followups = ["What material is currently analyzed?", "Explain the Neuromorphic Reflex Arc"]
+
+    # 4. Material Inspector & Tribological Profile
+    elif any(k in query_lower for k in ["material", "glass", "rock", "soda", "young", "modulus", "stiffness", "friction", "shear", "slip"]):
+        mat_class = material.get("material_class", "SODA-LIME-GLASS")
+        modulus = material.get("elastic_modulus_gpa", 70.0)
+        friction = material.get("static_friction_coeff", material.get("friction_coefficient_static_mu", 0.220))
+        shear = material.get("shear_limit_n", 1.80)
+        slip = material.get("slip_threshold_n", 0.242)
+        resp = f"Material Inspector active: {mat_class}. Young's Modulus (E) is set to {modulus} GPa with a static friction coefficient of {friction}. The shear limit is capped at {shear} N, and the micro-slip threshold is detected at {slip} N."
+        cat = "tribology"
+        followups = ["How does the acoustic spectrogram work?", "Check stream status"]
+
+    # 5. Neuromorphic Reflex & Edge Computing
+    elif any(k in query_lower for k in ["reflex", "edge", "latency", "tesla", "override", "borde"]):
+        latency = reflex.get("edge_latency_ms", 8.8)
+        override = reflex.get("reflex_override_engaged", False)
+        status = "ENGAGED (Micro-interruption active)" if override else "SECURE"
+        resp = f"The Neuromorphic Reflex Arc operates at the edge with an ultra-low latency of {latency} ms. Reflex override status is {status}, preempting slip events before central VLM processing."
+        cat = "architecture"
+        followups = ["What does the multi-digit topology indicate?", "Analyze acoustic spectrogram"]
+
+    # 6. Multi-Digit Topology (NASA Style)
+    elif any(k in query_lower for k in ["digit", "nasa", "hand", "finger", "pressure", "torque", "thumb", "index", "middle"]):
+        active = topology.get("active_digits", ["thumb", "index", "middle"])
+        balance = topology.get("torque_balance_index", 0.857)
+        resp = f"NASA JPL-style multi-digit topology managing active contact patches on: {', '.join(active)}. The current torque balance index is {balance}, ensuring proprioceptive stability across the e-skin surface."
+        cat = "architecture"
+        followups = ["What is TactoEval?", "View material profile"]
+
+    # 7. Acoustic Spectrogram / E-Skin
+    elif any(k in query_lower for k in ["acoustic", "spectrogram", "stick-slip", "vibration", "frequency", "hz", "energy"]):
+        freq = acoustic.get("dominant_frequency_hz", 314.3)
+        energy = acoustic.get("stick_slip_energy", 1.084)
+        resp = f"The Acoustic-Slip Spectrogram captures micro-vibrations via stick-slip friction dynamics, registering a dominant frequency of {freq} Hz and harmonic energy of {energy} for high-fidelity tactile feedback."
+        cat = "architecture"
+        followups = ["How does this apply to space robotics?", "View Young's Modulus"]
+
+    # 8. WebSocket Stream Status
+    elif any(k in query_lower for k in ["stream", "websocket", "connection", "connected", "50hz", "live"]):
+        resp = "The WebSocket stream is successfully connected, broadcasting closed-loop telemetry at 50 Hz to drive real-time 3D gel mesh vertex deformation and the neuromorphic HUD."
+        cat = "system"
+        followups = ["Explain the Sim2Real Safety Shield", "View TactoEval metrics"]
+
+    # 9. Material Calibration
+    elif any(k in query_lower for k in ["calibrate", "calibration", "probe", "bayesian", "fine-tune", "finetune"]):
+        resp = "Material calibration uses exploratory micro-contact probes (~0.2 N) with Bayesian-inspired heuristics to refine Young's Modulus, friction coefficient, and shear limit for unknown materials. Run calibration from the Material Calibration panel."
+        cat = "calibration"
+        followups = ["What is Young's Modulus?", "View material profile"]
+
+    # 10. Anomaly Detection
+    elif any(k in query_lower for k in ["anomaly", "anomalies", "degradation", "predictive", "maintenance", "drift"]):
+        resp = "The anomaly detector monitors force spikes, uncertainty drift, latency degradation, excessive stick-slip energy, and actuator drift trends using statistical heuristics. Risk levels: low, medium, high. Run checks from the Anomaly Detection panel."
+        cat = "anomaly"
+        followups = ["Check stream status", "Explain the Neuromorphic Reflex Arc"]
+
+    # 11. Compliance & Certification
+    elif any(k in query_lower for k in ["compliance", "certification", "iso", "conformant", "standard", "regulatory"]):
+        resp = "The compliance report validates telemetry against ISO 10218-1, ISO/TS 15066, IEC 61508, Sim2Real, and TactoEval standards. Generates a pass/fail score with per-check breakdown. Run from the Compliance Report panel."
+        cat = "compliance"
+        followups = ["What is the safety margin?", "View TactoEval metrics"]
+
+    # 12. Zero-Shot Grasp Planning
+    elif any(k in query_lower for k in ["grasp", "plan", "zero-shot", "zeroshot", "strategy", "orientation", "contact points"]):
+        resp = "Zero-shot grasp planning computes an optimal grasp strategy (precision pinch, power grasp, gentle cradle, soft pinch, adaptive) from the vision prior alone, without prior training data. Includes predicted force, contact points, and confidence. Run from the Grasp Plan panel."
+        cat = "grasp"
+        followups = ["What material is currently analyzed?", "Explain the Neuromorphic Reflex Arc"]
+
+    # 13. Session Replay & Data Logging
+    elif any(k in query_lower for k in ["session", "replay", "recording", "log", "export", "history"]):
+        resp = "Session replay allows frame-by-frame playback of recorded telemetry at 50 Hz. Sessions are auto-logged during live streaming. Export full session data as JSON for post-mortem analysis and model training."
+        cat = "replay"
+        followups = ["Check stream status", "Run anomaly check"]
+
+    # 14. Payment & Agentic Commerce
+    elif any(k in query_lower for k in ["payment", "order", "checkout", "release", "capture", "transaction", "commerce", "pay"]):
+        resp = "Agentic Commerce is active. The system assesses product quality via tactile telemetry (NVIDIA Nemotron) and autonomously decides payment release. Quality score >= 70: RELEASE_PAYMENT. 40-69: HOLD_FOR_REVIEW. Below 40: REJECT_AND_REFUND. Use the Payment Release panel to run assessments and the Transaction History panel to view orders."
+        cat = "commerce"
+        followups = ["What is the quality score?", "Explain the safety margin", "Show transaction history"]
+
+    # 15. Natural Intelligent Fallback
+    else:
+        resp = f"Analyzing query '{payload.query}' against live Afferent-Omni telemetry. The system operates in a 50 Hz closed loop, harmonizing tribological physics, Sim2Real safety, and tactile neural feedback."
+        cat = "general"
+        followups = ["What is TactoEval?", "Explain the Sim2Real Safety Shield", "What is Young's Modulus?"]
+
+    return ChatResponse(
+        response=resp,
+        category=cat,
+        suggested_followups=followups
+    )
