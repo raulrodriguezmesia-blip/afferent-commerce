@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import payments, stream, chat, infer, health
+from app.routers import payments, stream, chat, infer, health, anomaly, calibration, compliance, grasp, replay
 
 app = FastAPI(
     title="Afferent Commerce - Somatosensory Commerce API",
@@ -23,6 +23,11 @@ app.include_router(infer.router)
 app.include_router(stream.router)
 app.include_router(chat.router)
 app.include_router(payments.router)
+app.include_router(anomaly.router)
+app.include_router(calibration.router)
+app.include_router(compliance.router)
+app.include_router(grasp.router)
+app.include_router(replay.router)
 
 @app.get("/")
 async def root():
@@ -30,7 +35,7 @@ async def root():
         "project": "Afferent Commerce",
         "system_status": "OPERATIONAL",
         "model_stack": ["Meta SAM 3.1", "Meta Muse Spark", "Meta Muse Wonder", "Meta Muse Image", "NVIDIA Nemotron"],
-        "description": "Agentic Commerce for Quality Control — Tactile sensing + AI quality assessment + PayPal payment release",
+        "description": "Agentic Commerce for Quality Control - Tactile sensing + AI quality assessment + PayPal payment release",
         "tracks": ["Agentic Commerce", "Best Use of PayPal + AI", "Most Impactful", "Most Creative"],
     }
 

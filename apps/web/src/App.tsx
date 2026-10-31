@@ -56,7 +56,7 @@ function stressToCells(frame: TactileStreamFrame): TactileCell[] {
 
 function AppContent() {
   const toast = useToast();
-  const [objectLabel, setObjectLabel] = useState('Wine Glass');
+  const [objectLabel, setObjectLabel] = useState('Thin-Walled Glassware (Wine Stemware)');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AfferentResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,19 +72,27 @@ function AppContent() {
   const [shortcutHelp, setShortcutHelp] = useState(false);
   const [spaceMode, setSpaceMode] = useState(false);
   const [autoDemo, setAutoDemo] = useState(false);
+  const [activeTab, setActiveTab] = useState<'commerce' | 'audit'>('commerce');
 
-  const { frame, connected, sendControls } = useTactileStream('ws://localhost:8002/ws/v1/tactile-stream');
+  const { frame, connected, sendControls } = useTactileStream('ws://localhost:8000/ws/v1/tactile-stream');
+
+  const activeFrame = streaming ? frame : null;
 
   useEffect(() => {
     if (streaming) {
-      sendControls({
-        u_threshold: uThreshold, f_max: fMax, object_label: objectLabel,
-        active_digits: DIGIT_MAP[selectedDigit] || ['thumb', 'index', 'middle'],
-        space_mode: spaceMode,
-      });
+      sendControls({ u_threshold: uThreshold, f_max: fMax, object_label: objectLabel, active_digits: DIGIT_MAP[selectedDigit] || ['thumb', 'index', 'middle'], space_mode: spaceMode });
     }
   }, [uThreshold, fMax, objectLabel, streaming, selectedDigit, spaceMode, sendControls]);
 
+  useEffect(() => {
+    if (activeFrame) {
+      setStreamFrames((prev) => {
+        const next = [...prev, activeFrame];
+        if (next.length > 200) return next.slice(-200);
+        return next;
+      });
+    }
+  }, [activeFrame]);
   const runInference = async () => {
     setLoading(true);
     setError(null);
@@ -100,7 +108,6 @@ function AppContent() {
     }
   };
 
-  const activeFrame = streaming ? frame : null;
 
   const heatmapCells = useMemo(() => {
     if (activeFrame) return stressToCells(activeFrame);
@@ -134,64 +141,8 @@ function AppContent() {
 
   const displayCot = streamCot || cotData;
 
-  // Collect stream frames for anomaly detection
-  useEffect(() => {
-    if (activeFrame) {
-      setStreamFrames((prev) => {
-        const next = [...prev, activeFrame];
-        if (next.length > 200) return next.slice(-200);
-        return next;
-      });
-    }
-  }, [activeFrame]);
-
   const activeDigits = DIGIT_MAP[selectedDigit] || ['thumb', 'index', 'middle'];
 
-  // Auto-Demo sequence
-  useEffect(() => {
-    if (!autoDemo) return;
-    const sequence = async () => {
-      setViewMode('3d');
-      await new Promise((r) => setTimeout(r, 1000));
-      runInference();
-      await new Promise((r) => setTimeout(r, 3000));
-      setStreaming(true);
-      await new Promise((r) => setTimeout(r, 5000));
-      setSelectedDigit('full');
-      await new Promise((r) => setTimeout(r, 2000));
-      setStreaming(false);
-      setAutoDemo(false);
-    };
-    sequence();
-  }, [autoDemo]);
-
-  const shortcuts = [
-    { key: ' ', action: () => setStreaming((p) => !p), description: 'Toggle live stream' },
-    { key: '1', action: () => setSelectedDigit('thumb'), description: 'Select Thumb' },
-    { key: '2', action: () => setSelectedDigit('index'), description: 'Select Index' },
-    { key: '3', action: () => setSelectedDigit('middle'), description: 'Select Middle' },
-    { key: '4', action: () => setSelectedDigit('full'), description: 'Select Full Hand' },
-    { key: 'r', action: () => runInference(), description: 'Run inference' },
-    { key: 'c', action: () => {}, description: 'Open chat (click button)' },
-    { key: 'p', action: () => setPresentationMode(true), description: 'Presentation mode' },
-    { key: '?', shift: true, action: () => setShortcutHelp(true), description: 'Show shortcuts' },
-    { key: 'Escape', action: () => { setPresentationMode(false); setShortcutHelp(false); }, description: 'Close modals' },
-  ];
-
-  const presentationSteps = [
-    { title: 'Welcome to Afferent-Omni', description: 'A causal vision-to-touch prior system for dexterous robotic manipulation. Let us walk through the key capabilities.', action: () => { setViewMode('3d'); } },
-    { title: 'Tactile CoT & Afferent-Core', description: 'SAM 3.1 constructs a 32×32 spatial contact grid. Muse Wonder infers material properties and stress concentrations.', action: () => { runInference(); } },
-    { title: 'Sim2Real Safety Shield', description: 'Dynamic force budget with uncertainty gating. Authorized safe grasp when uncertainty is below threshold.', action: () => { setStreaming(true); } },
-    { title: '3D Gel Deformation', description: 'Real-time elastomer mesh deformation with glow spheres (green→red by force) and shear vector arrows.', action: () => { setViewMode('3d'); } },
-    { title: 'Neuromorphic Reflex HUD', description: 'Edge computing reflex arc at <10 ms. Intercepts slip before central VLM processing.' },
-    { title: 'Multi-Digit Topology', description: 'NASA JPL-style contact patches with torque balance index and center of pressure.', action: () => { setSelectedDigit('full'); } },
-    { title: 'Acoustic-Slip Spectrogram', description: 'Stick-slip micro-vibration analysis at 314.3 Hz for surface discrimination.' },
-    { title: 'Material Calibration', description: 'Bayesian micro-probe calibration for unknown materials.' },
-    { title: 'Compliance Report', description: 'ISO 10218-1, ISO/TS 15066, IEC 61508 conformity validation.' },
-    { title: 'Afferent-Omni Chat', description: 'AI copilot with real-time telemetry context, natural language queries, and suggested followups.' },
-  ];
-
-  // Omni telemetry resolution
   const neuromorphic: NeuromorphicReflex | null = activeFrame?.neuromorphic_reflex || data?.neuromorphic_reflex || null;
   const multiDigit: MultiDigitTopology | null = activeFrame?.multi_digit_topology || data?.multi_digit_topology || null;
   const acoustic: AcousticFrictionProfile | null = activeFrame?.acoustic_friction_profile || data?.acoustic_friction_profile || null;
@@ -209,126 +160,221 @@ function AppContent() {
 
   const physical = data?.physical_matrix;
 
+  const shortcuts = [
+    { key: ' ', action: () => setStreaming((p) => !p), description: 'Toggle live stream' },
+    { key: '1', action: () => setSelectedDigit('thumb'), description: 'Select Thumb' },
+    { key: '2', action: () => setSelectedDigit('index'), description: 'Select Index' },
+    { key: '3', action: () => setSelectedDigit('middle'), description: 'Select Middle' },
+    { key: '4', action: () => setSelectedDigit('full'), description: 'Select Full Hand' },
+    { key: 'r', action: () => runInference(), description: 'Run inference' },
+    { key: 'p', action: () => setPresentationMode(true), description: 'Presentation mode' },
+    { key: '?', shift: true, action: () => setShortcutHelp(true), description: 'Show shortcuts' },
+    { key: 'Escape', action: () => { setPresentationMode(false); setShortcutHelp(false); }, description: 'Close modals' },
+  ];
+
+  const presentationSteps = [
+    { title: 'Welcome to Afferent Commerce', description: 'Agentic Commerce for Quality Control — tactile sensing + AI quality assessment + PayPal payment release.' },
+    { title: 'Tactile Inspection', description: 'Run inference to inspect product quality using 32×32 spatial contact grid and material physics.' },
+    { title: 'Live Telemetry Stream', description: 'Start live stream to see real-time 3D gel deformation, neuromorphic reflex, and acoustic spectrogram.' },
+    { title: 'AI Quality Assessment', description: 'NVIDIA Nemotron evaluates quality and recommends payment action (RELEASE/HOLD/REJECT).' },
+    { title: 'Payment Release', description: 'Autonomous payment release via PayPal Orders API v2 based on quality score.' },
+    { title: 'Transaction History', description: 'Track all orders with status badges and export compliance reports.' },
+  ];
+
+  useEffect(() => {
+    if (autoDemo) {
+      const sequence = async () => {
+        setViewMode('3d');
+        await new Promise((r) => setTimeout(r, 1000));
+        runInference();
+        await new Promise((r) => setTimeout(r, 3000));
+        setStreaming(true);
+        await new Promise((r) => setTimeout(r, 5000));
+        setSelectedDigit('full');
+        await new Promise((r) => setTimeout(r, 2000));
+        setStreaming(false);
+        setAutoDemo(false);
+      };
+      sequence();
+    }
+  }, [autoDemo]);
+
   return (
-    <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#9ca3af', fontSize: 14 }}>Loading Afferent-Omni...</div>}>
+    <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#9ca3af', fontSize: 14 }}>Loading Afferent Commerce...</div>}>
       <div className="app">
         <KeyboardShortcuts shortcuts={shortcuts} />
         <ShortcutHelp shortcuts={shortcuts} visible={shortcutHelp} onClose={() => setShortcutHelp(false)} />
         <PresentationMode active={presentationMode} onToggle={() => setPresentationMode(false)} steps={presentationSteps} />
-      <header>
-        <div className="logo">
-          <div className="logo-dot" />
-          <div>
-            <h1>Afferent-Omni</h1>
-            <p className="tagline">A Causal Vision-to-Touch Prior • Robots see, but do not feel. Afferent-Omni gives them the intuition of touch.</p>
+        <header>
+          <div className="logo">
+            <div className="logo-dot" />
+            <div>
+              <h1>Afferent Commerce</h1>
+              <p className="tagline">Agentic Commerce for Quality Control — Tactile sensing + AI quality assessment + PayPal payment release</p>
+            </div>
           </div>
-        </div>
-        <div className="controls">
-          <CustomDropdown
-            options={['Igneous Rock', 'Tempered Glass', 'Biological Tissue', 'Wine Glass', 'Egg', 'Strawberry']}
-            selected={objectLabel}
-            onSelect={(opt) => setObjectLabel(opt)}
-          />
-          <input value={objectLabel} onChange={(e) => setObjectLabel(e.target.value)} placeholder="Or type a custom object label" />
-          <button onClick={runInference} disabled={loading}>{loading ? 'Inferencing...' : 'Run Afferent Inference'}</button>
-        </div>
-      </header>
-      <main>
-        <div className="column">
-          {displayCot && <TactileCoTPanel cot={displayCot} />}
-          {displayCot && <SafetyShield gating={displayCot.gating_decision} uncertainty={displayCot.uncertainty_score} forceBudget={data?.force_budget} />}
-          <ClosedLoopControl
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            streaming={streaming}
-            setStreaming={setStreaming}
-            connected={connected}
-            uThreshold={uThreshold}
-            setUThreshold={setUThreshold}
-            fMax={fMax}
-            setFMax={setFMax}
-            onParamsChange={(u, f) => sendControls({ u_threshold: u, f_max: f })}
-          />
-          <NeuromorphicReflexHUD reflex={neuromorphic} />
-          <NvidiaModelStatus apiBase={apiBase} />
-          <LiveCharts streamFrames={streamFrames} />
-          <PerformanceMonitor streamFrames={streamFrames} />
-          <SpaceMode active={spaceMode} onToggle={() => setSpaceMode(!spaceMode)} objectLabel={objectLabel} />
-          <SettingsPanel apiBase={apiBase} onApiBaseChange={setApiBase} />
+          <div className="controls">
+            <CustomDropdown
+              options={['Igneous Rock', 'Tempered Glass', 'Biological Tissue', 'Wine Glass', 'Egg', 'Strawberry']}
+              selected={objectLabel}
+              onSelect={(opt) => setObjectLabel(opt)}
+            />
+            <input value={objectLabel} onChange={(e) => setObjectLabel(e.target.value)} placeholder="Or type a custom object label" />
+            <button onClick={runInference} disabled={loading}>{loading ? 'Inferencing...' : 'Run Afferent Inference'}</button>
+          </div>
+        </header>
+
+        {/* Tab Navigation */}
+        <div style={{ display: 'flex', gap: 8, padding: '12px 24px', borderBottom: '1px solid var(--border)' }}>
           <button
-            onClick={() => setPresentationMode(true)}
-            style={{ background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 8, padding: '8px 16px', color: '#fff', cursor: 'pointer', fontSize: 11, width: '100%' }}
+            onClick={() => setActiveTab('commerce')}
+            style={{
+              background: activeTab === 'commerce' ? 'linear-gradient(90deg,#8b5cf6,#a855f7)' : 'transparent',
+              border: '1px solid var(--border)', borderRadius: 8, padding: '8px 20px',
+              color: activeTab === 'commerce' ? '#fff' : 'var(--sub)', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+            }}
           >
-            🎬 Presentation Mode
+            🛒 Agentic Commerce
           </button>
           <button
-            onClick={() => setAutoDemo(true)}
-            disabled={autoDemo}
-            style={{ background: autoDemo ? 'rgba(139,92,246,0.3)' : 'linear-gradient(90deg,#10b981,#059669)', border: 'none', borderRadius: 8, padding: '8px 16px', color: '#fff', cursor: autoDemo ? 'not-allowed' : 'pointer', fontSize: 11, width: '100%' }}
+            onClick={() => setActiveTab('audit')}
+            style={{
+              background: activeTab === 'audit' ? 'linear-gradient(90deg,#8b5cf6,#a855f7)' : 'transparent',
+              border: '1px solid var(--border)', borderRadius: 8, padding: '8px 20px',
+              color: activeTab === 'audit' ? '#fff' : 'var(--sub)', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+            }}
           >
-            {autoDemo ? '🎬 Running Auto-Demo...' : '🎬 Auto-Demo (for recording)'}
-          </button>
-          <button
-            onClick={() => setShortcutHelp(true)}
-            style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, padding: '8px 16px', color: '#c4b5fd', cursor: 'pointer', fontSize: 11, width: '100%' }}
-          >
-            ⌨️ Keyboard Shortcuts (?)
+            📋 Transaction Ledger & Audit
           </button>
         </div>
-        <div className="column" style={{ alignItems: 'center', gap: 24 }}>
-          <MultiDigitSelector selected={selectedDigit} onSelect={setSelectedDigit} topology={multiDigit} />
-          {viewMode === '2d' ? (
-            <TactileHeatmap cells={heatmapCells} gridSize={gridSize} />
-          ) : (
-            <ErrorBoundary name="3D Viewer">
-              <Tactile3DViewer deformationField={deformationField} stressField={stressField} gridSize={gridSize} activeDigits={activeDigits} appliedForce={activeFrame ? activeFrame.applied_force_n : (data?.force_budget?.recommended_grasp_force_N || 1.1)} maxForceCap={activeFrame ? activeFrame.f_max_n : (data?.force_budget?.max_allowed_normal_force_N || 1.8)} />
-            </ErrorBoundary>
-          )}
-          {data && <TactoEval telemetry={data.benchmark_telemetry} />}
-          {activeFrame && (
-            <div className="panel">
-              <h3>Live Telemetry</h3>
-              <div className="row"><span>Phase</span><strong>{activeFrame.phase}</strong></div>
-              <div className="row"><span>t</span><strong>{activeFrame.t_ms.toFixed(0)} ms</strong></div>
-              <div className="row"><span>Force</span><strong>{activeFrame.applied_force_n.toFixed(2)} N</strong></div>
-              <div className="row"><span>Gating</span><span className="badge">{activeFrame.gating_decision}</span></div>
+
+        {activeTab === 'commerce' && (
+          <main>
+            <div className="column">
+              {displayCot && <TactileCoTPanel cot={displayCot} />}
+              {displayCot && <SafetyShield gating={displayCot.gating_decision} uncertainty={displayCot.uncertainty_score} forceBudget={data?.force_budget} />}
+              <ClosedLoopControl
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                streaming={streaming}
+                setStreaming={setStreaming}
+                connected={connected}
+                uThreshold={uThreshold}
+                setUThreshold={setUThreshold}
+                fMax={fMax}
+                setFMax={setFMax}
+                onParamsChange={(u, f) => sendControls({ u_threshold: u, f_max: f })}
+              />
+              <NeuromorphicReflexHUD reflex={neuromorphic} />
+              <NvidiaModelStatus apiBase={apiBase} />
+              <LiveCharts streamFrames={streamFrames} />
+              <PerformanceMonitor streamFrames={streamFrames} />
+              <SpaceMode active={spaceMode} onToggle={() => setSpaceMode(!spaceMode)} objectLabel={objectLabel} />
+              <SettingsPanel apiBase={apiBase} onApiBaseChange={setApiBase} />
+              <button
+                onClick={() => setPresentationMode(true)}
+                style={{ background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 8, padding: '8px 16px', color: '#fff', cursor: 'pointer', fontSize: 11, width: '100%' }}
+              >
+                Presentation Mode
+              </button>
+              <button
+                onClick={() => setAutoDemo(true)}
+                disabled={autoDemo}
+                style={{ background: autoDemo ? 'rgba(139,92,246,0.3)' : 'linear-gradient(90deg,#10b981,#059669)', border: 'none', borderRadius: 8, padding: '8px 16px', color: '#fff', cursor: autoDemo ? 'not-allowed' : 'pointer', fontSize: 11, width: '100%' }}
+              >
+                {autoDemo ? 'Running Auto-Demo...' : 'Auto-Demo (for recording)'}
+              </button>
+              <button
+                onClick={() => setShortcutHelp(true)}
+                style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, padding: '8px 16px', color: '#c4b5fd', cursor: 'pointer', fontSize: 11, width: '100%' }}
+              >
+                Keyboard Shortcuts (?)
+              </button>
             </div>
-          )}
-          <AcousticSpectrogram profile={acoustic} />
-        </div>
-        <div className="column">
-          {data && <ForceBudget forceBudget={data.force_budget} physical={data.physical_matrix} />}
-          {(data || activeFrame) && <MaterialInspector materialProfile={materialProfile} physical={physical} />}
-          {data && (
-            <div className="panel">
-              <h3>Model Stack</h3>
-              <div className="cot-list">
-                {data.metadata.model_stack.map((m, i) => <div key={i} className="cot-item"><span className="dot" />{m}</div>)}
-              </div>
-              <div className="status-bar" style={{ marginTop: 16 }}>Schema Validated • 32x32 Spatial Grid • Sim2Real Safety Shield • Omni-Tier Telemetry</div>
+            <div className="column" style={{ alignItems: 'center', gap: 24 }}>
+              <MultiDigitSelector selected={selectedDigit} onSelect={setSelectedDigit} topology={multiDigit} />
+              {viewMode === '2d' ? (
+                <TactileHeatmap cells={heatmapCells} gridSize={gridSize} />
+              ) : (
+                <ErrorBoundary name="3D Viewer">
+                  <Tactile3DViewer deformationField={deformationField} stressField={stressField} gridSize={gridSize} activeDigits={activeDigits} />
+                </ErrorBoundary>
+              )}
+              {data && <TactoEval telemetry={data.benchmark_telemetry} />}
+              {activeFrame && (
+                <div className="panel">
+                  <h3>Live Telemetry</h3>
+                  <div className="row"><span>Phase</span><strong>{activeFrame.phase}</strong></div>
+                  <div className="row"><span>t</span><strong>{activeFrame.t_ms.toFixed(0)} ms</strong></div>
+                  <div className="row"><span>Force</span><strong>{activeFrame.applied_force_n.toFixed(2)} N</strong></div>
+                  <div className="row"><span>Gating</span><span className="badge">{activeFrame.gating_decision}</span></div>
+                </div>
+              )}
+              <AcousticSpectrogram profile={acoustic} />
+              <PaymentRelease apiBase={apiBase} objectLabel={objectLabel} telemetry={{ force_budget: data?.force_budget, neuromorphic_reflex: neuromorphic, tactile_reasoning_cot: data?.tactile_reasoning_cot, tactile_spatial_heatmap: data?.tactile_spatial_heatmap }} />
             </div>
-          )}
-          <MaterialCalibration apiBase={apiBase} objectLabel={objectLabel} />
-          <GraspPlanViewer apiBase={apiBase} objectLabel={objectLabel} />
-          <DigitalTwin apiBase={apiBase} objectLabel={objectLabel} />
-          <AnomalyAlert apiBase={apiBase} context={{ streamFrames }} />
-          <ComplianceReport apiBase={apiBase} context={{ force_budget: data?.force_budget, neuromorphicReflex: neuromorphic, tactile_reasoning_cot: data?.tactile_reasoning_cot, benchmark_telemetry: data?.benchmark_telemetry, materialProfile: materialProfile, acousticFrictionProfile: acoustic, multiDigitTopology: multiDigit, objectLabel }} />
-          <SessionReplay apiBase={apiBase} />
-          <PaymentRelease apiBase={apiBase} objectLabel={objectLabel} telemetry={{ force_budget: data?.force_budget, neuromorphic_reflex: neuromorphic, tactile_reasoning_cot: data?.tactile_reasoning_cot, tactile_spatial_heatmap: data?.tactile_spatial_heatmap }} />
-          <TransactionHistory apiBase={apiBase} />
-        </div>
-      </main>
-      {error && <div style={{ textAlign: 'center', color: 'var(--danger)', marginBottom: 24 }}>{error}</div>}
-      <AfferentChatDrawer
-        currentContext={{
-          materialProfile,
-          neuromorphicReflex: neuromorphic,
-          multiDigitTopology: multiDigit,
-          acousticFrictionProfile: acoustic,
-        }}
-      />
+            <div className="column">
+              {data && <ForceBudget forceBudget={data.force_budget} physical={data.physical_matrix} />}
+              {(data || activeFrame) && <MaterialInspector materialProfile={materialProfile} physical={physical} />}
+              {data && (
+                <div className="panel">
+                  <h3>Model Stack</h3>
+                  <div className="cot-list">
+                    {data.metadata.model_stack.map((m, i) => <div key={i} className="cot-item"><span className="dot" />{m}</div>)}
+                  </div>
+                  <div className="status-bar" style={{ marginTop: 16 }}>Schema Validated • 32x32 Spatial Grid • Sim2Real Safety Shield • Omni-Tier Telemetry • Agentic Commerce</div>
+                </div>
+              )}
+              <MaterialCalibration apiBase={apiBase} objectLabel={objectLabel} />
+              <GraspPlanViewer apiBase={apiBase} objectLabel={objectLabel} />
+              <DigitalTwin apiBase={apiBase} objectLabel={objectLabel} />
+              <AnomalyAlert apiBase={apiBase} context={{ streamFrames }} />
+              <ComplianceReport apiBase={apiBase} context={{ force_budget: data?.force_budget, neuromorphicReflex: neuromorphic, tactile_reasoning_cot: data?.tactile_reasoning_cot, benchmark_telemetry: data?.benchmark_telemetry, materialProfile: materialProfile, acousticFrictionProfile: acoustic, multiDigitTopology: multiDigit, objectLabel }} />
+              <SessionReplay apiBase={apiBase} />
+              <TransactionHistory apiBase={apiBase} />
+            </div>
+          </main>
+        )}
+
+        {activeTab === 'audit' && (
+          <main>
+            <div className="column">
+              <TransactionHistory apiBase={apiBase} />
+              <SessionReplay apiBase={apiBase} />
+              <MaterialCalibration apiBase={apiBase} objectLabel={objectLabel} />
+            </div>
+            <div className="column" style={{ alignItems: 'center', gap: 24 }}>
+              <ComplianceReport apiBase={apiBase} context={{ force_budget: data?.force_budget, neuromorphicReflex: neuromorphic, tactile_reasoning_cot: data?.tactile_reasoning_cot, benchmark_telemetry: data?.benchmark_telemetry, materialProfile: materialProfile, acousticFrictionProfile: acoustic, multiDigitTopology: multiDigit, objectLabel }} />
+              <GraspPlanViewer apiBase={apiBase} objectLabel={objectLabel} />
+              <DigitalTwin apiBase={apiBase} objectLabel={objectLabel} />
+            </div>
+            <div className="column">
+              <AnomalyAlert apiBase={apiBase} context={{ streamFrames }} />
+              <MaterialInspector materialProfile={materialProfile} physical={physical} />
+              {data && (
+                <div className="panel">
+                  <h3>Model Stack</h3>
+                  <div className="cot-list">
+                    {data.metadata.model_stack.map((m, i) => <div key={i} className="cot-item"><span className="dot" />{m}</div>)}
+                  </div>
+                  <div className="status-bar" style={{ marginTop: 16 }}>Schema Validated • 32x32 Spatial Grid • Sim2Real Safety Shield • Omni-Tier Telemetry • Agentic Commerce</div>
+                </div>
+              )}
+            </div>
+          </main>
+        )}
+
+        {error && <div style={{ textAlign: 'center', color: 'var(--danger)', marginBottom: 24 }}>{error}</div>}
+        <AfferentChatDrawer
+          currentContext={{
+            materialProfile,
+            neuromorphicReflex: neuromorphic,
+            multiDigitTopology: multiDigit,
+            acousticFrictionProfile: acoustic,
+          }}
+        />
       </div>
-      </Suspense>
+    </Suspense>
   );
 }
 
