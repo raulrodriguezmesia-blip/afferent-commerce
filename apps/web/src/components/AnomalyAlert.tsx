@@ -57,15 +57,15 @@ export const AnomalyAlert: React.FC<AnomalyAlertProps> = ({ apiBase, context }) 
         <div>
           <div style={{
             display: 'inline-block', padding: '4px 12px', borderRadius: 999, marginBottom: 8,
-            background: `${riskColor(result.risk_level)}20`, color: riskColor(result.risk_level),
-            fontWeight: 600, fontSize: 11, border: `1px solid ${riskColor(result.risk_level)}40`,
+            background: `${riskColor(result.risk_level ?? 'low')}20`, color: riskColor(result.risk_level ?? 'low'),
+            fontWeight: 600, fontSize: 11, border: `1px solid ${riskColor(result.risk_level ?? 'low')}40`,
           }}>
-            Risk: {result.risk_level.toUpperCase()} • {result.anomaly_count} anomalies
+            Risk: {(result.risk_level ?? '').toUpperCase()} • {result.anomaly_count} anomalies
           </div>
           <div style={{ fontSize: 11, color: '#d1d5db', marginBottom: 8 }}>{result.summary}</div>
           {result.anomalies.map((a: any, i: number) => (
             <div key={i} style={{ fontSize: 10, color: '#9ca3af', padding: '4px 0', borderBottom: '1px solid rgba(36,36,47,0.5)' }}>
-              [{a.severity.toUpperCase()}] {a.type} {a.value !== undefined ? `— ${a.value}` : ''}
+              [{(a.severity ?? '').toUpperCase()}] {a.type} {a.value !== undefined ? `— ${a.value}` : ''}
             </div>
           ))}
           {result.anomalies.length === 0 && (
