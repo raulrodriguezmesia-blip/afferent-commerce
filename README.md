@@ -1,5 +1,5 @@
 ﻿# Afferent Commerce — Autonomous Agentic Commerce & Physical Quality Control Engine
-[![M8ven Score](https://m8ven.ai/badge/mcp/raulrodriguezmesia-blip/afferent-omni)](https://m8ven.ai/mcp/raulrodriguezmesia-blip/afferent-omni?s=readme)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-v3.0.0-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
