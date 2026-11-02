@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import payments, stream, chat, infer, health, anomaly, calibration, compliance, grasp, replay
+from app.routers import payments, stream, chat, infer, health, anomaly, calibration, compliance, grasp, replay, chat_ws
+import os
 
 app = FastAPI(
     title="Afferent Commerce - Somatosensory Commerce API",
@@ -28,6 +29,7 @@ app.include_router(calibration.router)
 app.include_router(compliance.router)
 app.include_router(grasp.router)
 app.include_router(replay.router)
+app.include_router(chat_ws.router)
 
 @app.get("/")
 async def root():
@@ -42,3 +44,18 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "online", "engine": "Afferent-Commerce-v1", "system": "operational"}
+
+
+@app.get("/health/ready")
+async def health_ready():
+    paypal_configured = bool(os.getenv("PAYPAL_CLIENT_ID") and os.getenv("PAYPAL_CLIENT_SECRET"))
+    nebius_configured = bool(os.getenv("NEBIUS_API_KEY"))
+    return {
+        "status": "ready",
+        "checks": {
+            "paypal": "configured" if paypal_configured else "missing",
+            "nebius": "configured" if nebius_configured else "missing",
+        },
+        "system": "operational",
+    }
+

@@ -1,19 +1,3 @@
-"""WebSocket router for closed-loop tactile telemetry streaming.
-
-Endpoint: /ws/v1/tactile-stream
-
-Simulates a high-frequency (~50 Hz) closed-loop grasp sequence so judges can
-watch the Sim2Real Safety Shield react in real time:
-
-  Phase 1: Approach & Visual Prior          (t = 0   -  50 ms)
-  Phase 2: Micro-Contact Exploratory Probe  (t = 50  - 150 ms, 0.2 N probe)
-  Phase 3: Force Budget Adjustment          (t = 150 - 300 ms)
-  Phase 4: Stable Grasp / Emergency Abort   (t > 300 ms)
-
-Each frame carries the 32x32 pressure matrix, uncertainty, gating decision,
-force budget and a phase label. The client may send control messages to tune
-U_th (uncertainty threshold) and F_max in real time.
-"""
 import asyncio
 import json
 import math
@@ -42,7 +26,6 @@ def _phase_for(t_ms: float) -> str:
 
 def _frame(t_ms: float, u_th: float, f_max: float, material: Dict[str, Any], active_digits: list) -> Dict[str, Any]:
     phase = _phase_for(t_ms)
-    # Uncertainty decays as contact confirms the visual prior.
     if phase == "APPROACH_VISUAL_PRIOR":
         uncertainty = round(random.uniform(0.35, 0.55), 3)
     elif phase == "MICRO_CONTACT_PROBE":
@@ -54,7 +37,6 @@ def _frame(t_ms: float, u_th: float, f_max: float, material: Dict[str, Any], act
 
     gating = "TACTILE_EXPLORATION_REQUIRED" if uncertainty > u_th else "AUTHORIZED_SAFE_GRASP"
 
-    # Applied force ramps per phase.
     if phase == "APPROACH_VISUAL_PRIOR":
         force = 0.0
     elif phase == "MICRO_CONTACT_PROBE":
@@ -64,7 +46,6 @@ def _frame(t_ms: float, u_th: float, f_max: float, material: Dict[str, Any], act
     else:
         force = min(f_max * 0.85, 1.6)
 
-    # Abort if force exceeds max or shear limit.
     shear_limit = material["shear_limit_n"]
     if force > f_max or force > shear_limit:
         gating = "GRASP_DENIED"
@@ -99,11 +80,9 @@ async def tactile_stream(websocket: WebSocket):
     f_max = 1.8
     material = resolve_material("Thin-Walled Glassware (Wine Stemware)")
     active_digits = ["thumb", "index", "middle"]
-    space_mode = False
 
-    # Allow client to push control params at any time.
     async def control_listener():
-        nonlocal u_th, f_max, material, active_digits, space_mode
+        nonlocal u_th, f_max, material, active_digits
         while True:
             try:
                 msg = await websocket.receive_text()
@@ -116,8 +95,6 @@ async def tactile_stream(websocket: WebSocket):
                     material = resolve_material(str(data["object_label"]))
                 if "active_digits" in data:
                     active_digits = list(data["active_digits"])
-                if "space_mode" in data:
-                    space_mode = bool(data["space_mode"])
             except WebSocketDisconnect:
                 break
             except Exception:
@@ -127,16 +104,19 @@ async def tactile_stream(websocket: WebSocket):
 
     try:
         t = 0.0
-        dt = 20.0  # 50 Hz
+        dt = 20.0
         while True:
             frame = _frame(t, u_th, f_max, material, active_digits)
-            await websocket.send_text(json.dumps(frame))
+            try:
+                await websocket.send_text(json.dumps(frame))
+            except (WebSocketDisconnect, RuntimeError, Exception):
+                break
             if frame["phase"] == "EMERGENCY_ABORT":
                 await asyncio.sleep(0.5)
                 break
             t += dt
             if t > 600:
-                t = 0.0  # loop for continuous demo
+                t = 0.0
             await asyncio.sleep(dt / 1000.0)
     except WebSocketDisconnect:
         pass

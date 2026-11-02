@@ -22,8 +22,17 @@ async def assess_quality(telemetry: Dict[str, Any], object_label: str) -> Dict[s
     quality_score = _compute_quality_score(telemetry)
     nemotron_diagnosis = await _get_nemotron_diagnosis(telemetry, object_label, quality_score)
 
+    # Determine payment action based on quality score
+    if quality_score >= 70:
+        payment_action = "RELEASED"
+    elif quality_score >= 40:
+        payment_action = "HELD"
+    else:
+        payment_action = "REJECTED"
+
     return {
         "quality_score": quality_score,
+        "payment_action": payment_action,
         "passed": quality_score >= 70,
         "confidence": round(min(0.99, quality_score / 100 + 0.1), 3),
         "nemotron_diagnosis": nemotron_diagnosis,

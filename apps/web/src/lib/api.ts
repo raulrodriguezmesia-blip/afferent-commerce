@@ -1,16 +1,28 @@
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
+export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API Error [${response.status}]: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 import { type AfferentResponse } from '../types/afferent';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000';
-
 export async function predictTactile(objectLabel: string, imageBase64: string): Promise<AfferentResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/predict-tactile`, {
+  return fetchApi<AfferentResponse>('/api/v1/predict-tactile', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ object_label: objectLabel, image_base64: imageBase64 })
+    body: JSON.stringify({ object_label: objectLabel, image_base64: imageBase64 }),
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || 'Failed to predict tactile prior');
-  }
-  return res.json();
 }
