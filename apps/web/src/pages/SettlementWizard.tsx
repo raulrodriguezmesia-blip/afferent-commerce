@@ -24,7 +24,6 @@ interface SettlementWizardProps {
 }
 
 export function SettlementWizard({ activeTab }: SettlementWizardProps) {
-  if (activeTab !== 'wizard') return null;
   const [auditorEmail, setAuditorEmail] = useState('auditor@enterprise.com');
   const [amountUSD, setAmountUSD] = useState('1500.00');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -71,6 +70,8 @@ export function SettlementWizard({ activeTab }: SettlementWizardProps) {
       })
       .catch(() => undefined);
   }, []);
+
+  if (activeTab !== 'wizard') return null;
 
   const handleSettlement = async (e: React.FormEvent) => {
     e.preventDefault();
