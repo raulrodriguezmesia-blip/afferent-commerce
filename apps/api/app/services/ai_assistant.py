@@ -20,7 +20,7 @@ class FinOpsAssistant:
 
         Conoces:
         - Flujo: Vision-to-Touch -> Quality Assessment -> PayPal Orders API v2 -> Settlement condicional
-        - Métricas: Revenue, AOV, Pending Payouts, Disputas prevenidas
+        - MÃƒÂ©tricas: Revenue, AOV, Pending Payouts, Disputas prevenidas
         - Riesgo: Fraud Detection, Idempotencia, Split Payments
         - Cumplimiento: Audit Trail, PDF reports
 
@@ -75,12 +75,30 @@ class FinOpsAssistant:
 
     def _fallback_answer(self, question: str) -> str:
         q = question.lower()
+        founder_keywords = (
+            "vision",
+            "especial",
+            "proposito",
+            "product founder",
+            "que hace",
+            "qué hace",
+            "que es",
+            "qué es",
+            "como funciona",
+            "cómo funciona",
+            "sistema",
+            "proyecto",
+            "affectent",
+        )
+        if any(keyword in q for keyword in founder_keywords):
+            return self._founder_vision_answer()
+
         if "revenue" in q or "ventas" in q:
-            return "## Análisis de Ventas\n\nBasado en el dashboard:\n\n- **Revenue Sandbox:** $128,430.00 (+12.5% vs periodo anterior)\n- **AOV:** $84.20\n- **Tasa de aprobación:** Alta gracias al Quality-Gated Settlement\n\n**Recomendación:** Mantén el umbral de calidad >= 70 para maximizar aprobación sin incrementar riesgo."
+            return "## AnÃƒÂ¡lisis de Ventas\n\nBasado en el dashboard:\n\n- **Revenue Sandbox:** $128,430.00 (+12.5% vs periodo anterior)\n- **AOV:** $84.20\n- **Tasa de aprobaciÃƒÂ³n:** Alta gracias al Quality-Gated Settlement\n\n**RecomendaciÃƒÂ³n:** MantÃƒÂ©n el umbral de calidad >= 70 para maximizar aprobaciÃƒÂ³n sin incrementar riesgo."
         if "payout" in q or "pago" in q:
-            return "## Estado de Liquidaciones\n\n- **Completados:** Mayoría vía PayPal Orders API v2\n- **Pendientes:** $12,100.50 en revisión\n- **Bloqueados:** Por debajo del umbral de calidad o flags de fraude\n\n**Tip:** Usa `X-Idempotency-Key` en `settle-and-dispatch` para evitar doble captura."
+            return "## Estado de Liquidaciones\n\n- **Completados:** MayorÃƒÂ­a vÃƒÂ­a PayPal Orders API v2\n- **Pendientes:** $12,100.50 en revisiÃƒÂ³n\n- **Bloqueados:** Por debajo del umbral de calidad o flags de fraude\n\n**Tip:** Usa `X-Idempotency-Key` en `settle-and-dispatch` para evitar doble captura."
         if "riesgo" in q or "fraud" in q:
-            return "## Detección de Riesgo\n\nEl sistema evalúa:\n- **Calidad** (<40 → Alto riesgo)\n- **Monto** (> $5000 → Flag)\n- **Anomalías de telemetría**\n- **Velocidad de transacciones**\n\n**Acción:** Transacciones con `risk_level: high` se bloquean automáticamente."
-        if "split" in q or "comisión" in q:
-            return "## Split Payments\n\nConfiguración actual: **5% plataforma / 95% vendedor**\n\nEjemplo $100.00:\n- Comisión plataforma: **$5.00**\n- Liquidación vendedor: **$95.00**\n\nEl cálculo es automático en `settle-and-dispatch`."
-        return "## FinOps Assistant\n\nPuedo ayudarte con:\n- **Órdenes:** Estado, seguimiento, liquidación\n- **Finanzas:** Revenue, AOV, payouts pendientes\n- **Riesgo:** Fraude, calidad, anomalías\n- **Cumplimiento:** Auditoría, trazabilidad\n\nPrueba preguntando: *'¿Cómo va el revenue hoy?'* o *'¿Qué transacciones están en hold?'*"
+            return "## DetecciÃƒÂ³n de Riesgo\n\nEl sistema evalÃƒÂºa:\n- **Calidad** (<40 Ã¢â€ â€™ Alto riesgo)\n- **Monto** (> $5000 Ã¢â€ â€™ Flag)\n- **AnomalÃƒÂ­as de telemetrÃƒÂ­a**\n- **Velocidad de transacciones**\n\n**AcciÃƒÂ³n:** Transacciones con `risk_level: high` se bloquean automÃƒÂ¡ticamente."
+        if "split" in q or "comisiÃƒÂ³n" in q:
+            return "## Split Payments\n\nConfiguraciÃƒÂ³n actual: **5% plataforma / 95% vendedor**\n\nEjemplo $100.00:\n- ComisiÃƒÂ³n plataforma: **$5.00**\n- LiquidaciÃƒÂ³n vendedor: **$95.00**\n\nEl cÃƒÂ¡lculo es automÃƒÂ¡tico en `settle-and-dispatch`."
+        return "## FinOps Assistant\n\nPuedo ayudarte con:\n- **Ãƒâ€œrdenes:** Estado, seguimiento, liquidaciÃƒÂ³n\n- **Finanzas:** Revenue, AOV, payouts pendientes\n- **Riesgo:** Fraude, calidad, anomalÃƒÂ­as\n- **Cumplimiento:** AuditorÃƒÂ­a, trazabilidad\n\nPrueba preguntando: *'Ã‚Â¿CÃƒÂ³mo va el revenue hoy?'* o *'Ã‚Â¿QuÃƒÂ© transacciones estÃƒÂ¡n en hold?'*"
