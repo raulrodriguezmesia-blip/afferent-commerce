@@ -27,7 +27,7 @@ export default function FloatingChat({ isOpen, onToggle }: FloatingChatProps) {
   const connectWS = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) return;
 
-    const socket = new WebSocket('ws://localhost:8000/ws/finops-assistant');
+    const socket = new WebSocket(import.meta.env.VITE_WS_URL || 'ws://localhost:8010/ws/finops-assistant');
     ws.current = socket;
 
     socket.onopen = () => {
@@ -74,13 +74,14 @@ export default function FloatingChat({ isOpen, onToggle }: FloatingChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN) return;
+  const sendMessage = (e?: React.FormEvent, quickText?: string) => {
+    if (e) e.preventDefault();
+    const text = quickText ?? input;
+    if (!text.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN) return;
 
-    setMessages((prev) => [...prev, { role: 'user', content: input }]);
-    ws.current.send(JSON.stringify({ message: input }));
-    setInput('');
+    setMessages((prev) => [...prev, { role: 'user', content: text }]);
+    ws.current.send(JSON.stringify({ message: text }));
+    if (!quickText) setInput('');
   };
 
   return (
@@ -152,6 +153,16 @@ export default function FloatingChat({ isOpen, onToggle }: FloatingChatProps) {
               <div ref={messagesEndRef} />
             </div>
 
+            <div className="px-4 pt-3">
+              <button
+                type="button"
+                onClick={() => sendMessage(undefined, '¿Cuál es la visión de producto de Afferent Commerce?')}
+                disabled={!connected}
+                className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                💡 Visión del Producto (Product Founder)
+              </button>
+            </div>
             <div className="border-t border-slate-200 p-4 bg-white">
               <form onSubmit={sendMessage} className="flex gap-2">
                 <input

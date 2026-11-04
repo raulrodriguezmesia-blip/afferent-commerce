@@ -11,6 +11,10 @@ class FinOpsAssistant:
         self.model = os.getenv("NEBIUS_MODEL", "nvidia/nemotron-3-super-120b-a12b")
 
     async def answer(self, question: str) -> str:
+        founder_keywords = ("vision", "especial", "proposito", "product founder", "que hace", "que hace especial")
+        if any(keyword in question.lower() for keyword in founder_keywords):
+            return self._founder_vision_answer()
+
         context = """
         Eres el FinOps Assistant de Afferent Commerce, una plataforma de Agentic Commerce con Quality-Gated Settlement para PayPal.
 
@@ -22,6 +26,11 @@ class FinOpsAssistant:
 
         Responde de forma concisa, profesional y orientada a negocio. Usa markdown cuando convenga.
         Siempre ofrece insights accionables.
+
+        Vision de producto (Product Founder):
+        Afferent Commerce no es solo una demo de componentes o scripts aislados; es la convergencia entre la fisica somatosensorial y la ejecucion financiera autonoma.
+        La excelencia tecnica (monorepo FastAPI/React, telemetria a 50 Hz y razonamiento multimodal con NVIDIA Nemotron) solo cobra sentido cuando resuelve un problema critico del mundo real.
+        Al delegar en el agente la decision condicional de pago en PayPal segun la calidad fisica del producto, transformamos una inspeccion de calidad compleja en un motor de comercio confiable y libre de fraude.
         """
 
         if not self.api_key:
@@ -51,6 +60,18 @@ class FinOpsAssistant:
                 return self._fallback_answer(question)
         except Exception:
             return self._fallback_answer(question)
+
+    def _founder_vision_answer(self) -> str:
+        return (
+            "## Product Vision\n\n"
+            "Afferent Commerce no es solo una demostracion de componentes o scripts aislados; "
+            "es la convergencia entre la fisica somatosensorial y la ejecucion financiera autonoma.\n\n"
+            "La excelencia tecnica (monorepo FastAPI/React, telemetria a 50 Hz y razonamiento multimodal "
+            "con NVIDIA Nemotron) solo cobra sentido cuando resuelve un problema critico del mundo real. "
+            "Al delegar en el agente la decision condicional de pago en PayPal segun la calidad fisica del "
+            "producto, transformamos una inspeccion de calidad compleja en un motor de comercio confiable y "
+            "libre de fraude."
+        )
 
     def _fallback_answer(self, question: str) -> str:
         q = question.lower()

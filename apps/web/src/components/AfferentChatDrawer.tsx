@@ -1,6 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Sparkles, Bot, User } from 'lucide-react';
 
+export const SYSTEM_FOUNDER_PROMPT = `
+Eres el copiloto agéntico de Afferent Commerce. Tu objetivo no es solo explicar código, sino transmitir la visión de un Product Founder:
+
+- QUÉ HACE: Conecta la evaluación somatosensorial de productos físicos (telemetría táctil a 50 Hz con NVIDIA Nemotron) con la captura o retención condicional de fondos mediante la API v2 de PayPal Orders.
+- POR QUÉ IMPORTA: Elimina el fraude de calidad en e-commerce y cadenas de suministro B2B. Hace que la tecnología física compleja sea invisible para centrarse en el impacto financiero real.
+- TONO: Riguroso en lo técnico (módulo de Young, límites de cizallamiento, firmas acústico-friccionales), pero siempre enfocado en el valor comercial y la autonomía del agente.
+`;
+
+const FOUNDER_VISION_RESPONSE = `Afferent Commerce no es solo una demostración de componentes o scripts aislados; es la convergencia entre la física somatosensorial y la ejecución financiera autónoma.
+
+Como Product Founder, la visión fue clara: la excelencia técnica (nuestro monorepo en FastAPI/React, telemetría a 50 Hz y razonamiento multimodal con NVIDIA Nemotron) solo cobra sentido cuando resuelve un problema crítico del mundo real. Al delegar en el agente la decisión condicional de pago en PayPal según la calidad física del producto, transformamos una inspección de calidad compleja en un motor de comercio confiable y libre de fraude.`;
+
 interface Message {
   id: string;
   sender: 'user' | 'assistant';
@@ -34,7 +46,8 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
   const [suggestedFollowups, setSuggestedFollowups] = useState<string[]>([
     '¿Qué significa el Módulo de Young?',
     'Explica el Arco Reflejo Neuromórfico',
-    'Analizar espectrograma acústico'
+    'Analizar espectrograma acústico',
+    '¿Cuál es la visión de producto de Afferent Commerce?'
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,6 +59,35 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
   const handleSend = async (textToSend?: string) => {
     const queryText = textToSend || input;
     if (!queryText.trim()) return;
+
+    const isFounderVisionQuestion = /visi[oó]n|especial|prop[oó]sito|product founder|qu[eé] hace/i.test(queryText);
+
+    if (isFounderVisionQuestion) {
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        sender: 'user',
+        text: queryText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+
+      const botMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'assistant',
+        text: FOUNDER_VISION_RESPONSE,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        provider: 'Product Founder',
+        providerColor: '#8b5cf6',
+      };
+
+      setMessages((prev) => [...prev, userMsg, botMsg]);
+      if (!textToSend) setInput('');
+      setSuggestedFollowups([
+        '¿Qué significa el Módulo de Young?',
+        'Explica el Arco Reflejo Neuromórfico',
+        'Analizar espectrograma acústico',
+      ]);
+      return;
+    }
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -67,7 +109,8 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
     };
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/chat-assistant', {
+      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8010';
+      const res = await fetch(`${API_BASE}/api/v1/chat-assistant`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: queryText, context })
@@ -211,6 +254,16 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
           {/* Suggested Followups Chips */}
           {suggestedFollowups.length > 0 && (
             <div style={{ padding: '8px 12px', background: 'rgba(10,10,15,0.6)', borderTop: '1px solid rgba(139,92,246,0.1)', display: 'flex', gap: 6, overflowX: 'auto' }}>
+              <button
+                onClick={() => handleSend('¿Cuál es la visión de producto de Afferent Commerce?')}
+                style={{
+                  background: 'rgba(88,28,135,0.4)', color: '#c4b5fd',
+                  border: '1px solid rgba(139,92,246,0.3)', fontSize: 11,
+                  padding: '4px 10px', borderRadius: 999, whiteSpace: 'nowrap', cursor: 'pointer',
+                }}
+              >
+                💡 Visión del Producto (Product Founder)
+              </button>
               {suggestedFollowups.map((chip, idx) => (
                 <button
                   key={idx}
