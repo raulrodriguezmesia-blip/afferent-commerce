@@ -39,7 +39,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
     {
       id: '1',
       sender: 'assistant',
-      text: 'Hola. Soy Afferent-Omni Chat, tu asistente somatosensorial. Preg√∫ntame sobre f√≠sica tribol√≥gica, reflejos neurom√≥rficos o telemetr√≠a en tiempo real.',
+      text: 'Bienvenido al Centro de Mando de Afferent Commerce. He analizado la telemetrÌa de la orden actual y estoy listo para recomendar la liquidaciÛn. øDeseas que analice el riesgo ahora?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);

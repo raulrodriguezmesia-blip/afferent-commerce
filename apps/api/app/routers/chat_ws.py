@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+﻿from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import List
 import json
 import asyncio
@@ -33,7 +33,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.send_personal_message(
         {
             "role": "assistant",
-            "content": "¡Hola! Soy tu **FinOps Assistant** impulsado por NVIDIA Nemotron. Puedo analizar tus órdenes, métricas de ventas, riesgos de pago y recomendaciones financieras. ¿En qué puedo ayudarte?",
+            "content": "Bienvenido al Centro de Mando de Afferent Commerce. He analizado la telemetría de la orden actual y estoy listo para recomendar la liquidación. ¿Deseas que analice el riesgo ahora?",
             "type": "message",
         },
         websocket,
@@ -63,3 +63,4 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
     except Exception:
         manager.disconnect(websocket)
+
