@@ -1,32 +1,55 @@
-export interface TactileCell {
-  x: number;
-  y: number;
-  max_pressure_kPa: number;
-  rigidity_score: number;
-  risk_level: 'SAFE' | 'CAUTION' | 'DANGER';
+/* Afferent Commerce - Unified Types */
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
-export interface MaterialProfile {
-  elastic_modulus_gpa: number;
-  static_friction_coeff: number;
-  shear_limit_n: number;
-  material_class: string;
-  slip_threshold_n: number;
-  safety_margin_percent: number;
-  stress_distribution_kpa: number[][];
-  deformation_field_mm: number[][];
+export interface FraudFlags {
+  risk_level: 'low' | 'medium' | 'high';
+  risk_score: number;
+  flags: string[];
 }
 
-export interface NeuromorphicReflex {
-  edge_latency_ms: number;
-  slip_detected: boolean;
-  reflex_override_engaged: boolean;
+export interface QualityResult {
+  quality_score: number;
+  payment_action: 'RELEASED' | 'HELD' | 'REJECTED';
+  nemotron_diagnosis: string;
+  split_payment: {
+    platform_fee: number;
+    merchant_settlement: number;
+    total_amount: number;
+  };
+  fraud_flags: FraudFlags;
 }
 
-export interface MultiDigitTopology {
-  active_digits: string[];
-  center_of_pressure: number[];
-  torque_balance_index: number;
+export interface Order {
+  order_id: string;
+  status: string;
+  amount: number;
+  currency: string;
+  quality_assessment: any;
+  payment_released: boolean;
+  created_at: string;
+}
+
+export interface SettleAndDispatchRequest {
+  object_label: string;
+  telemetry: Record<string, any>;
+  recipient_email: string;
+  amount: number;
+  platform_fee_percent?: number;
+}
+
+export interface QualityAssessRequest {
+  object_label: string;
+  telemetry: Record<string, any>;
+}
+
+export interface AfferentResponse {
+  object_label: string;
+  image_base64: string;
+  predictions: Record<string, any>;
 }
 
 export interface AcousticFrictionProfile {
@@ -35,68 +58,32 @@ export interface AcousticFrictionProfile {
   harmonic_spectrum: number[];
 }
 
-export interface AfferentResponse {
-  metadata: {
-    project: string;
-    system_status: string;
-    timestamp_utc: string;
-    model_stack: string[];
-  };
-  tactile_reasoning_cot: {
-    target_class: string;
-    tactile_chain_of_thought: string[];
-    uncertainty_score: number;
-    gating_decision: 'AUTHORIZED_SAFE_GRASP' | 'TACTILE_EXPLORATION_REQUIRED' | 'GRASP_DENIED';
-  };
-  physical_matrix: {
-    surface_roughness_ra_um: number;
-    friction_coefficient_static_mu: number;
-    bulk_modulus_GPa: number;
-    fragility_score: number;
-    elastic_modulus_gpa: number;
-    static_friction_coeff: number;
-    shear_limit_n: number;
-    material_class: string;
-  };
-  material_profile?: MaterialProfile;
-  force_budget: {
-    unit: string;
-    max_allowed_normal_force_N: number;
-    recommended_grasp_force_N: number;
-    minimum_slippage_threshold_N: number;
-    force_budget_margin_percent: number;
-  };
-  tactile_spatial_heatmap: {
-    grid_resolution: [number, number];
-    cells: TactileCell[];
-    safe_zones: any[];
-    prohibited_zones: any[];
-  };
-  benchmark_telemetry: {
-    damage_prevention_confidence: string;
-    estimated_latency_ms: number;
-    force_over_tightening_reduction_percent: number;
-    damage_avoidance_index_percent: number;
-  };
-  neuromorphic_reflex?: NeuromorphicReflex;
-  multi_digit_topology?: MultiDigitTopology;
-  acoustic_friction_profile?: AcousticFrictionProfile;
+export interface MultiDigitTopology {
+  active_digits: string[];
+  center_of_pressure: number[];
+  torque_balance_index: number;
 }
 
-export interface TactileStreamFrame {
-  t_ms: number;
-  phase: string;
-  uncertainty_score: number;
-  u_threshold: number;
-  gating_decision: string;
-  applied_force_n: number;
-  f_max_n: number;
-  shear_limit_n: number;
-  material_class: string;
-  stress_distribution_kpa: number[][];
-  deformation_field_mm: number[][];
-  grid_resolution: [number, number];
-  neuromorphic_reflex?: NeuromorphicReflex;
-  multi_digit_topology?: MultiDigitTopology;
-  acoustic_friction_profile?: AcousticFrictionProfile;
+export interface NeuromorphicReflex {
+  edge_latency_ms: number;
+  slip_detected: boolean;
+  reflex_override_engaged: boolean;
+}
+
+export interface TactileCell {
+  x: number;
+  y: number;
+  risk_level: 'SAFE' | 'CAUTION' | 'DANGER' | string;
+  force_n?: number;
+  pressure_kpa: number;
+  max_pressure_kPa?: number;
+  rigidity_score?: number;
+}
+
+export interface MaterialProfile {
+  [key: string]: unknown;
+}
+
+export interface PhysicalReport {
+  [key: string]: unknown;
 }

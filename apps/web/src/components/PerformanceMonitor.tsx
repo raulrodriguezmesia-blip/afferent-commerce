@@ -32,37 +32,37 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({ streamFr
   }, []);
 
   const panelStyle: React.CSSProperties = {
-    background: 'rgba(15,15,23,0.85)', border: '1px solid rgba(139,92,246,0.2)',
-    borderRadius: 12, padding: 16, backdropFilter: 'blur(10px)',
+    background: 'rgba(15,23,42,0.62)', border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 12, padding: 20, backdropFilter: 'blur(10px)',
   };
 
   const metricStyle: React.CSSProperties = {
     display: 'flex', justifyContent: 'space-between', padding: '4px 0',
-    fontSize: 11, borderBottom: '1px solid rgba(36,36,47,0.5)',
+    fontSize: 12, borderBottom: '1px solid rgba(36,36,47,0.5)',
   };
 
   return (
     <div style={panelStyle}>
-      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9ca3af', marginBottom: 12 }}>
+      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94a3b8', marginBottom: 12 }}>
         Performance Monitor
       </h3>
       <div style={metricStyle}>
-        <span style={{ color: '#9ca3af' }}>FPS</span>
+        <span style={{ color: '#94a3b8' }}>FPS</span>
         <strong style={{ color: fps >= 50 ? '#10b981' : fps >= 30 ? '#f59e0b' : '#ef4444' }}>{fps}</strong>
       </div>
       <div style={metricStyle}>
-        <span style={{ color: '#9ca3af' }}>Memory (MB)</span>
+        <span style={{ color: '#94a3b8' }}>Memory (MB)</span>
         <strong style={{ color: '#c4b5fd' }}>{memory || 'N/A'}</strong>
       </div>
       <div style={metricStyle}>
-        <span style={{ color: '#9ca3af' }}>Stream Frames</span>
+        <span style={{ color: '#94a3b8' }}>Stream Frames</span>
         <strong style={{ color: '#c4b5fd' }}>{streamFrames.length}</strong>
       </div>
       <div style={metricStyle}>
-        <span style={{ color: '#9ca3af' }}>WS Latency</span>
+        <span style={{ color: '#94a3b8' }}>WS Latency</span>
         <strong style={{ color: '#c4b5fd' }}>{streamFrames.length > 0 ? `${streamFrames[streamFrames.length - 1]?.t_ms?.toFixed(0) || 0} ms` : 'N/A'}</strong>
       </div>
-      <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6, textAlign: 'center' }}>
+      <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 6, textAlign: 'center' }}>
         Real-time performance metrics
       </div>
     </div>

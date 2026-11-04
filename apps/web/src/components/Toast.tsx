@@ -52,7 +52,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             key={t.id}
             style={{
               background: 'rgba(19,17,28,0.95)', border: `1px solid ${colorMap[t.type]}40`,
-              borderRadius: 10, padding: '10px 16px', color: '#e5e7eb', fontSize: 12,
+              borderRadius: 10, padding: '10px 16px', color: '#f8fafc', fontSize: 12,
               backdropFilter: 'blur(12px)', boxShadow: `0 10px 30px -5px ${colorMap[t.type]}30`,
               display: 'flex', alignItems: 'center', gap: 10, minWidth: 250,
               animation: 'slideInRight 0.3s ease-out',
@@ -62,7 +62,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             <span style={{ flex: 1 }}>{t.message}</span>
             <button
               onClick={() => removeToast(t.id)}
-              style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: 14 }}
+              style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 14 }}
             >
               ×
             </button>

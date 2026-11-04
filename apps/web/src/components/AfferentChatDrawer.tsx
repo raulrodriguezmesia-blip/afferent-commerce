@@ -143,7 +143,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '12px 16px', background: 'rgba(30,30,46,0.8)',
-            borderBottom: '1px solid rgba(139,92,246,0.2)',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#34d399', animation: 'ping 1.5s infinite' }} />
@@ -151,7 +151,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
                 <h3 style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
                   Afferent-Omni Chat
                 </h3>
-                <p style={{ fontSize: 10, color: '#c4b5fd', margin: 0 }}>Somatosensorial AI Assistant</p>
+                <p style={{ fontSize: 11, color: '#c4b5fd', margin: 0 }}>Somatosensorial AI Assistant</p>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 4 }}>
@@ -160,7 +160,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
           </div>
 
           {/* Messages Body */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12, fontSize: 12 }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 12, fontSize: 12 }}>
             {messages.map((m) => (
               <div key={m.id} style={{ display: 'flex', gap: 8, justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
                 {m.sender === 'assistant' && (
@@ -172,7 +172,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
                   maxWidth: '80%', padding: 12, borderRadius: 12,
                   background: m.sender === 'user' ? '#7c3aed' : 'rgba(30,30,46,0.9)',
                   color: m.sender === 'user' ? '#fff' : '#e2e8f0',
-                  border: m.sender === 'user' ? 'none' : '1px solid rgba(139,92,246,0.2)',
+                  border: m.sender === 'user' ? 'none' : '1px solid rgba(255,255,255,0.08)',
                   borderBottomRightRadius: m.sender === 'user' ? 4 : 12,
                   borderBottomLeftRadius: m.sender === 'assistant' ? 4 : 12,
                 }}>
@@ -217,7 +217,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
                   onClick={() => handleSend(chip)}
                   style={{
                     background: 'rgba(88,28,135,0.4)', color: '#c4b5fd',
-                    border: '1px solid rgba(139,92,246,0.3)', fontSize: 10,
+                    border: '1px solid rgba(139,92,246,0.3)', fontSize: 11,
                     padding: '4px 10px', borderRadius: 999, whiteSpace: 'nowrap', cursor: 'pointer',
                   }}
                 >
@@ -228,7 +228,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
           )}
 
           {/* Input Footer */}
-          <div style={{ padding: 12, background: 'rgba(30,30,46,0.6)', borderTop: '1px solid rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: 12, background: 'rgba(30,30,46,0.6)', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
               type="text"
               value={input}
@@ -237,12 +237,12 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
               placeholder="Pregúntale al sistema..."
               style={{
                 flex: 1, background: 'rgba(15,15,23,0.9)', border: '1px solid rgba(139,92,246,0.3)',
-                borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#fff', outline: 'none',
+                borderRadius: 16, padding: '8px 12px', fontSize: 12, color: '#fff', outline: 'none',
               }}
             />
             <button
               onClick={() => handleSend()}
-              style={{ background: '#7c3aed', color: '#fff', padding: 8, borderRadius: 8, border: 'none', cursor: 'pointer' }}
+              style={{ background: '#7c3aed', color: '#fff', padding: 10, borderRadius: 16, border: 'none', cursor: 'pointer' }}
             >
               <Send style={{ width: 16, height: 16 }} />
             </button>

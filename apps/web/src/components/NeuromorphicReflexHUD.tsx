@@ -41,8 +41,8 @@ export default function NeuromorphicReflexHUD({ reflex }: Props) {
         <strong>{reflex ? (reflex.reflex_override_engaged ? 'ENGAGED' : 'STANDBY') : '—'}</strong>
       </div>
       <div style={{ marginTop: 12 }}>
-        <div style={{ fontSize: 11, color: 'var(--sub)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Event Log Ticker</div>
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text)', background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: 8, minHeight: 90 }}>
+        <div style={{ fontSize: 12, color: 'var(--sub)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Event Log Ticker</div>
+        <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', background: 'rgba(0,0,0,0.3)', borderRadius: 16, padding: 10, minHeight: 90 }}>
           {log.map((l, i) => <div key={i} style={{ opacity: 1 - i * 0.12 }}>{l}</div>)}
           {log.length === 0 && <div style={{ color: 'var(--sub)' }}>Awaiting telemetry…</div>}
         </div>

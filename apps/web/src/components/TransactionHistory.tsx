@@ -22,8 +22,8 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ apiBase 
   useEffect(() => { fetchOrders(); }, []);
 
   const panelStyle: React.CSSProperties = {
-    background: 'rgba(15,15,23,0.85)', border: '1px solid rgba(139,92,246,0.2)',
-    borderRadius: 12, padding: 16, backdropFilter: 'blur(10px)',
+    background: 'rgba(15,23,42,0.62)', border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 12, padding: 20, backdropFilter: 'blur(10px)',
   };
 
   const statusColor = (s: string) => {
@@ -36,7 +36,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ apiBase 
   return (
     <div style={panelStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9ca3af', margin: 0 }}>
+        <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94a3b8', margin: 0 }}>
           Transaction History • Agentic Commerce
         </h3>
         <button
@@ -44,22 +44,22 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ apiBase 
           disabled={loading}
           style={{
             background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)',
-            borderRadius: 8, padding: '4px 10px', color: '#c4b5fd', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 10,
+            borderRadius: 16, padding: '4px 10px', color: '#c4b5fd', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 11,
           }}
         >
           {loading ? 'Loading...' : 'Refresh'}
         </button>
       </div>
       {orders.length === 0 && (
-        <div style={{ fontSize: 11, color: '#9ca3af', textAlign: 'center', padding: 12 }}>
+        <div style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', padding: 12 }}>
           No transactions yet. Run a quality assessment to create an order.
         </div>
       )}
       {orders.map((o: any, i: number) => (
-        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(36,36,47,0.5)', fontSize: 11 }}>
+        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(36,36,47,0.5)', fontSize: 12 }}>
           <div>
-            <div style={{ color: '#e5e7eb', fontWeight: 600 }}>{o.order_id}</div>
-            <div style={{ color: '#9ca3af', fontSize: 10 }}>{o.amount} {o.currency} • {o.items?.[0]?.object_label || 'N/A'}</div>
+            <div style={{ color: '#f8fafc', fontWeight: 600 }}>{o.order_id}</div>
+            <div style={{ color: '#94a3b8', fontSize: 11 }}>{o.amount} {o.currency} • {o.items?.[0]?.object_label || 'N/A'}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <span style={{

@@ -32,45 +32,45 @@ export const MaterialCalibration: React.FC<MaterialCalibrationProps> = ({ apiBas
   };
 
   const panelStyle: React.CSSProperties = {
-    background: 'rgba(15,15,23,0.85)', border: '1px solid rgba(139,92,246,0.2)',
-    borderRadius: 12, padding: 16, backdropFilter: 'blur(10px)',
+    background: 'rgba(15,23,42,0.62)', border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 12, padding: 20, backdropFilter: 'blur(10px)',
   };
 
   return (
     <div style={panelStyle}>
-      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9ca3af', marginBottom: 12 }}>
+      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94a3b8', marginBottom: 12 }}>
         Material Calibration • Bayesian Probe
       </h3>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-        <span style={{ fontSize: 11, color: '#9ca3af' }}>Probes:</span>
+        <span style={{ fontSize: 12, color: '#94a3b8' }}>Probes:</span>
         <input
           type="range" min={3} max={10} value={probes}
           onChange={(e) => setProbes(Number(e.target.value))}
           style={{ flex: 1, accentColor: '#8b5cf6' }}
         />
-        <span style={{ fontSize: 11, color: '#e5e7eb', minWidth: 20 }}>{probes}</span>
+        <span style={{ fontSize: 12, color: '#f8fafc', minWidth: 20 }}>{probes}</span>
         <button
           onClick={runCalibration}
           disabled={loading}
           style={{
             background: loading ? 'rgba(139,92,246,0.3)' : 'linear-gradient(90deg,#8b5cf6,#a855f7)',
-            border: 'none', borderRadius: 8, padding: '6px 14px', color: '#fff',
-            cursor: loading ? 'not-allowed' : 'pointer', fontSize: 11,
+            border: 'none', borderRadius: 16, padding: '6px 14px', color: '#fff',
+            cursor: loading ? 'not-allowed' : 'pointer', fontSize: 12,
           }}
         >
           {loading ? 'Calibrating...' : 'Run Calibration'}
         </button>
       </div>
-      {error && <div style={{ color: '#ef4444', fontSize: 11, marginBottom: 8 }}>{error}</div>}
+      {error && <div style={{ color: '#ef4444', fontSize: 12, marginBottom: 8 }}>{error}</div>}
       {result && (
-        <div style={{ fontSize: 11, color: '#d1d5db', background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: 10 }}>
+        <div style={{ fontSize: 12, color: '#e2e8f0', background: 'rgba(0,0,0,0.3)', borderRadius: 16, padding: 10 }}>
           <div style={{ marginBottom: 6, color: '#c4b5fd', fontWeight: 600 }}>
             Status: {result.status} • Confidence: {(result.confidence * 100).toFixed(1)}%
           </div>
           <div>Elastic Modulus: <strong>{result.calibrated.elastic_modulus_gpa} GPa</strong></div>
           <div>Static Friction: <strong>{result.calibrated.static_friction_coeff}</strong></div>
           <div>Shear Limit: <strong>{result.calibrated.shear_limit_n} N</strong></div>
-          <div style={{ marginTop: 6, color: '#9ca3af' }}>Probes executed: {result.probe_count}</div>
+          <div style={{ marginTop: 6, color: '#94a3b8' }}>Probes executed: {result.probe_count}</div>
         </div>
       )}
     </div>

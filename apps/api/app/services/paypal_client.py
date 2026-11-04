@@ -5,6 +5,7 @@ Handles authentication, order creation, capture, and webhook verification
 for the Afferent Commerce agentic quality-control payment flow.
 """
 import os
+import asyncio
 import httpx
 from typing import Dict, Any, Optional
 
@@ -133,6 +134,112 @@ class PayPalClient:
     def verify_webhook(self, payload: Dict[str, Any], headers: Dict[str, str]) -> bool:
         """Verify PayPal webhook signature (simplified)."""
         return True
+
+    async def create_payout(
+        self,
+        recipient_email: str,
+        amount: float,
+        currency: str = "USD",
+        note: str = "Afferent Commerce settlement",
+        sender_batch_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        import uuid
+
+        token = await self._get_access_token()
+        if not sender_batch_id:
+            sender_batch_id = f"AFFERENT-{uuid.uuid4().hex[:16].upper()}"
+        sender_item_id = f"ITEM-{uuid.uuid4().hex[:12].upper()}"
+
+        payload = {
+            "sender_batch_header": {
+                "sender_batch_id": sender_batch_id,
+                "email_subject": "Afferent Commerce settlement",
+                "email_message": "Your Afferent Commerce settlement payment has been processed.",
+            },
+            "items": [
+                {
+                    "recipient_type": "EMAIL",
+                    "amount": {
+                        "value": f"{amount:.2f}",
+                        "currency": currency,
+                    },
+                    "receiver": recipient_email,
+                    "note": note,
+                    "sender_item_id": sender_item_id,
+                }
+            ],
+        }
+
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.post(
+                f"{self.base_url}/v1/payments/payouts",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+            )
+            if resp.status_code in (200, 201):
+                data = resp.json()
+                header = data.get("batch_header", {}) or {}
+                batch_id = header.get("payout_batch_id", sender_batch_id)
+                items = data.get("items", []) or []
+                item = items[0] if items else {}
+                result = {
+                    "batch_id": batch_id,
+                    "sender_batch_id": sender_batch_id,
+                    "payout_item_id": item.get("payout_item_id", sender_item_id),
+                    "transaction_id": item.get("transaction_id", ""),
+                    "status": item.get("transaction_status", header.get("batch_status", "PENDING")),
+                    "amount": amount,
+                    "currency": currency,
+                    "recipient_email": recipient_email,
+                }
+
+                # PayPal often returns only the batch header on creation.
+                # Poll briefly so the frontend can show the real transaction ID.
+                for _ in range(15):
+                    if result.get("transaction_id"):
+                        return result
+                    await asyncio.sleep(1)
+                    try:
+                        detailed = await self.get_payout(result["batch_id"], result["payout_item_id"])
+                        if detailed.get("transaction_id") or detailed.get("status") not in ("PENDING",):
+                            return detailed
+                    except Exception:
+                        continue
+                return result
+            raise Exception(f"PayPal payout failed: {resp.status_code} {resp.text}")
+
+    async def get_payout(self, batch_id: str, payout_item_id: str) -> Dict[str, Any]:
+        """Fetch a processed PayPal payout item and its transaction ID."""
+        token = await self._get_access_token()
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.get(
+                f"{self.base_url}/v1/payments/payouts/{batch_id}",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                header = data.get("batch_header", {}) or {}
+                items = data.get("items", []) or []
+                item = next(
+                    (candidate for candidate in items if candidate.get("payout_item_id") == payout_item_id),
+                    items[0] if items else {},
+                )
+                payout_item = item.get("payout_item", {}) or {}
+                amount_obj = payout_item.get("amount", item.get("amount", {})) or {}
+                return {
+                    "batch_id": header.get("payout_batch_id", batch_id),
+                    "sender_batch_id": header.get("sender_batch_header", {}).get("sender_batch_id", ""),
+                    "payout_item_id": item.get("payout_item_id", payout_item_id),
+                    "transaction_id": item.get("transaction_id", ""),
+                    "status": item.get("transaction_status", header.get("batch_status", "PENDING")),
+                    "amount": float(amount_obj.get("value", 0) or 0),
+                    "currency": amount_obj.get("currency", "USD"),
+                    "recipient_email": payout_item.get("receiver", item.get("receiver", "")),
+                }
+            raise Exception(f"PayPal payout lookup failed: {resp.status_code} {resp.text}")
 
     def is_configured(self) -> bool:
         return bool(self.client_id and self.client_secret)

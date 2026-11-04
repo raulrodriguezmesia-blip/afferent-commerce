@@ -65,7 +65,7 @@ export default function ClosedLoopControl(props: Props) {
       </div>
 
       {streaming && (
-        <div style={{ marginTop: 12, fontSize: 11, color: 'var(--sub)', textAlign: 'center' }}>
+        <div style={{ marginTop: 12, fontSize: 12, color: 'var(--sub)', textAlign: 'center' }}>
           Live 50 Hz telemetry • 4-phase micro-contact exploration loop
         </div>
       )}

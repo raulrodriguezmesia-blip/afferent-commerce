@@ -63,20 +63,20 @@ export const LiveCharts: React.FC<LiveChartsProps> = ({ streamFrames }) => {
   }, [streamFrames]);
 
   const panelStyle: React.CSSProperties = {
-    background: 'rgba(15,15,23,0.85)', border: '1px solid rgba(139,92,246,0.2)',
-    borderRadius: 12, padding: 16, backdropFilter: 'blur(10px)',
+    background: 'rgba(15,23,42,0.62)', border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 12, padding: 20, backdropFilter: 'blur(10px)',
   };
 
   return (
     <div style={panelStyle}>
-      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9ca3af', marginBottom: 12 }}>
+      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94a3b8', marginBottom: 12 }}>
         Live Telemetry Charts
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <canvas ref={latencyCanvas} width={300} height={80} style={{ width: '100%', height: 80, borderRadius: 8 }} />
-        <canvas ref={forceCanvas} width={300} height={80} style={{ width: '100%', height: 80, borderRadius: 8 }} />
+        <canvas ref={latencyCanvas} width={300} height={80} style={{ width: '100%', height: 80, borderRadius: 16 }} />
+        <canvas ref={forceCanvas} width={300} height={80} style={{ width: '100%', height: 80, borderRadius: 16 }} />
       </div>
-      <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6, textAlign: 'center' }}>
+      <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 6, textAlign: 'center' }}>
         {streamFrames.length} frames captured
       </div>
     </div>

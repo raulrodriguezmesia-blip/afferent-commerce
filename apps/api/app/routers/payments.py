@@ -6,11 +6,15 @@ from app.services.quality_agent import assess_quality
 from app.services.email_dispatcher import send_audit_report_email
 from app.routers.compliance_pdf import _generate_pdf, CompliancePDFReq
 from app.core.idempotency import get_idempotent, set_idempotent
+from app.services.paypal_client import PayPalClient
 from app.core.errors import PaymentSettlementError, paypal_error_detail
 import uuid
 import datetime
 
 router = APIRouter(prefix="/api/v1", tags=["PayPal Payments & Agentic Commerce"])
+
+paypal_client = PayPalClient()
+_paypal_payouts: Dict[str, Dict[str, Any]] = {}
 
 # In-memory order store (replace with DB in production)
 _orders: Dict[str, Dict[str, Any]] = {}
@@ -76,6 +80,24 @@ class SettleAndDispatchRequest(BaseModel):
     recipient_email: str
     amount: float = 25.0
     platform_fee_percent: float = 5.0
+
+
+class PayPalPayoutRequest(BaseModel):
+    recipient_email: str
+    amount: float
+    currency: str = "USD"
+    note: str = "Afferent Commerce settlement"
+
+
+class PayPalPayoutResponse(BaseModel):
+    batch_id: str
+    sender_batch_id: str
+    payout_item_id: str
+    transaction_id: str
+    status: str
+    amount: float
+    currency: str
+    recipient_email: str
 
 
 @router.post("/orders", response_model=OrderResponse)
@@ -199,6 +221,44 @@ async def paypal_webhook(payload: Dict[str, Any]):
         "resource_id": resource.get("id", ""),
         "processed": True,
     }
+
+
+@router.post("/paypal/payout", response_model=PayPalPayoutResponse)
+async def create_paypal_payout(payload: PayPalPayoutRequest):
+    """Create a real PayPal Sandbox payout and return visible transaction IDs."""
+    if not paypal_client.is_configured():
+        raise HTTPException(status_code=503, detail="PayPal is not configured")
+
+    try:
+        result = await paypal_client.create_payout(
+            recipient_email=payload.recipient_email,
+            amount=payload.amount,
+            currency=payload.currency,
+            note=payload.note,
+        )
+        _paypal_payouts[result["payout_item_id"]] = result
+        return result
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"PayPal payout failed: {exc}")
+
+
+@router.get("/paypal/payouts/{payout_item_id}", response_model=PayPalPayoutResponse)
+async def get_paypal_payout(payout_item_id: str):
+    """Return a previously created PayPal payout with its transaction IDs."""
+    result = _paypal_payouts.get(payout_item_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="PayPal payout not found")
+
+    if paypal_client.is_configured():
+        try:
+            refreshed = await paypal_client.get_payout(result["batch_id"], payout_item_id)
+            _paypal_payouts[payout_item_id] = refreshed
+            return refreshed
+        except Exception:
+            # Keep the last known payout data if PayPal lookup is temporarily unavailable.
+            pass
+
+    return result
 
 
 @router.get("/orders")

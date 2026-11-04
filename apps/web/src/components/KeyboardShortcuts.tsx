@@ -50,13 +50,13 @@ export const ShortcutHelp: React.FC<{ shortcuts: Shortcut[]; visible: boolean; o
         <h3 style={{ fontSize: 14, color: '#c4b5fd', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Keyboard Shortcuts</h3>
         {shortcuts.map((s, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(36,36,47,0.5)', fontSize: 12 }}>
-            <span style={{ color: '#d1d5db' }}>{s.description}</span>
-            <kbd style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 4, padding: '2px 8px', color: '#c4b5fd', fontSize: 11, fontFamily: 'monospace' }}>
+            <span style={{ color: '#e2e8f0' }}>{s.description}</span>
+            <kbd style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 4, padding: '2px 8px', color: '#c4b5fd', fontSize: 12, fontFamily: 'monospace' }}>
               {s.ctrl ? 'Ctrl+' : ''}{s.shift ? 'Shift+' : ''}{s.key.toUpperCase()}
             </kbd>
           </div>
         ))}
-        <button onClick={onClose} style={{ marginTop: 16, background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 8, padding: '6px 16px', color: '#fff', cursor: 'pointer', fontSize: 11, width: '100%' }}>
+        <button onClick={onClose} style={{ marginTop: 16, background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 16, padding: '6px 16px', color: '#fff', cursor: 'pointer', fontSize: 12, width: '100%' }}>
           Close
         </button>
       </div>

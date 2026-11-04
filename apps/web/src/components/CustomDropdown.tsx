@@ -35,7 +35,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, selecte
     borderRadius: 12,
     fontSize: 13,
     fontWeight: 500,
-    color: '#e5e7eb',
+    color: '#f8fafc',
     background: 'rgba(19, 17, 28, 0.8)',
     border: '1px solid rgba(139, 92, 246, 0.3)',
     boxShadow: '0 10px 25px -5px rgba(0,0,0,0.4)',

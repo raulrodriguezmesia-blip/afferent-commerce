@@ -175,7 +175,7 @@ export default function Tactile3DViewer({ deformationField, stressField, gridSiz
           <gridHelper args={[4, 32, '#24242f', '#1a1a24']} />
         </Canvas>
       </div>
-      <div style={{ padding: '8px 16px', fontSize: 11, color: 'var(--sub)' }}>
+      <div style={{ padding: '8px 16px', fontSize: 12, color: 'var(--sub)' }}>
         Drag to rotate • Scroll to zoom • Vertex Z = gel displacement (mm) • Color = pressure • Glow spheres = contact force (green→red) • Arrows = shear vector direction
       </div>
     </div>

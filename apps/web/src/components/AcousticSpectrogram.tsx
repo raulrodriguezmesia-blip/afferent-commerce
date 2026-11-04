@@ -54,8 +54,8 @@ export default function AcousticSpectrogram({ profile }: Props) {
         <div>Dominant Freq: <strong style={{ color: 'var(--text)' }}>{profile ? `${profile.dominant_frequency_hz} Hz` : '—'}</strong></div>
         <div>Stick-Slip Energy: <strong style={{ color: 'var(--text)' }}>{profile ? profile.stick_slip_energy.toFixed(3) : '—'}</strong></div>
       </div>
-      <canvas ref={canvasRef} width={320} height={120} style={{ width: '100%', height: 120, borderRadius: 8, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ fontSize: 11, color: 'var(--sub)', marginTop: 6 }}>Stick-slip micro-vibrations • harmonic spectrum (12 bins)</div>
+      <canvas ref={canvasRef} width={320} height={120} style={{ width: '100%', height: 120, borderRadius: 16, background: 'rgba(0,0,0,0.4)' }} />
+      <div style={{ fontSize: 12, color: 'var(--sub)', marginTop: 6 }}>Stick-slip micro-vibrations • harmonic spectrum (12 bins)</div>
     </div>
   );
 }

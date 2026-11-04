@@ -4,12 +4,15 @@ import App from './App.tsx'
 import './index.css'
 import './styles/index.css'
 import { ToastProvider } from './components/ui/Toaster'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ToastProvider>
-      <App />
-    </ToastProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 )
 

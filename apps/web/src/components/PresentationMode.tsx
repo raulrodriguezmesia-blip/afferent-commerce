@@ -32,28 +32,28 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({ active, onTo
         <h2 style={{ fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 16 }}>
           {steps[currentStep]?.title}
         </h2>
-        <p style={{ fontSize: 14, color: '#9ca3af', lineHeight: 1.7, marginBottom: 32 }}>
+        <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.7, marginBottom: 32 }}>
           {steps[currentStep]?.description}
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
           <button
             onClick={() => setCurrentStep((p) => Math.max(0, p - 1))}
             disabled={currentStep === 0}
-            style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, padding: '8px 20px', color: '#c4b5fd', cursor: currentStep === 0 ? 'not-allowed' : 'pointer', opacity: currentStep === 0 ? 0.4 : 1 }}
+            style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 16, padding: '8px 20px', color: '#c4b5fd', cursor: currentStep === 0 ? 'not-allowed' : 'pointer', opacity: currentStep === 0 ? 0.4 : 1 }}
           >
             ← Previous
           </button>
           {currentStep < steps.length - 1 ? (
             <button
               onClick={() => setCurrentStep((p) => p + 1)}
-              style={{ background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 8, padding: '8px 20px', color: '#fff', cursor: 'pointer' }}
+              style={{ background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 16, padding: '8px 20px', color: '#fff', cursor: 'pointer' }}
             >
               Next →
             </button>
           ) : (
             <button
               onClick={onToggle}
-              style={{ background: 'linear-gradient(90deg,#10b981,#059669)', border: 'none', borderRadius: 8, padding: '8px 20px', color: '#fff', cursor: 'pointer' }}
+              style={{ background: 'linear-gradient(90deg,#10b981,#059669)', border: 'none', borderRadius: 16, padding: '8px 20px', color: '#fff', cursor: 'pointer' }}
             >
               Finish Demo
             </button>
@@ -61,7 +61,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({ active, onTo
         </div>
         <button
           onClick={onToggle}
-          style={{ marginTop: 24, background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: 12 }}
+          style={{ marginTop: 24, background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 12 }}
         >
           Exit Presentation Mode (Esc)
         </button>

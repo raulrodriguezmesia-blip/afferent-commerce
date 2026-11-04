@@ -1,57 +1,61 @@
-import { Component } from 'react';
-import type { ErrorInfo, ReactNode } from 'react';
+/* Error Boundary */
+import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
-  name?: string;
 }
 
 interface State {
   hasError: boolean;
-  error: Error | null;
+  error?: Error;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+  public state: State = {
+    hasError: false,
+  };
 
-  static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`[ErrorBoundary${this.props.name ? `: ${this.props.name}` : ''}]`, error, errorInfo);
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo);
   }
 
-  render() {
+  public render() {
     if (this.state.hasError) {
-      if (this.props.fallback) return this.props.fallback;
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        <div style={{
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          borderRadius: 12, padding: 16, color: '#fca5a5', fontSize: 11,
-        }}>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>
-            ⚠️ {this.props.name || 'Component'} Error
+        <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-slate-900/50 border border-slate-800 rounded-3xl p-8 text-center shadow-2xl backdrop-blur">
+            <div className="flex justify-center mb-4">
+              <div className="p-4 rounded-full bg-rose-900/50">
+                <AlertTriangle className="h-8 w-8 text-rose-400" />
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-slate-100 mb-2">Algo salió mal</h2>
+            <p className="text-slate-400 text-sm mb-6">
+              Ha ocurrido un error inesperado. Por favor, recarga la página o contacta al soporte.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors"
+            >
+              Recargar página
+            </button>
           </div>
-          <div style={{ opacity: 0.8 }}>
-            {this.state.error?.message || 'An unexpected error occurred.'}
-          </div>
-          <button
-            onClick={() => this.setState({ hasError: false, error: null })}
-            style={{
-              marginTop: 8, background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)',
-              borderRadius: 6, padding: '4px 10px', color: '#fca5a5', cursor: 'pointer', fontSize: 10,
-            }}
-          >
-            Retry
-          </button>
         </div>
       );
     }
+
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;

@@ -82,17 +82,17 @@ export const SessionReplay: React.FC<SessionReplayProps> = ({ apiBase }) => {
   }, []);
 
   const panelStyle: React.CSSProperties = {
-    background: 'rgba(15,15,23,0.85)', border: '1px solid rgba(139,92,246,0.2)',
-    borderRadius: 12, padding: 16, backdropFilter: 'blur(10px)',
+    background: 'rgba(15,23,42,0.62)', border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 12, padding: 20, backdropFilter: 'blur(10px)',
   };
 
   return (
     <div style={panelStyle}>
-      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9ca3af', marginBottom: 12 }}>
+      <h3 style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94a3b8', marginBottom: 12 }}>
         Session Replay • Data Logger
       </h3>
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <button onClick={fetchSessions} style={{ background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 8, padding: '6px 12px', color: '#fff', cursor: 'pointer', fontSize: 11 }}>
+        <button onClick={fetchSessions} style={{ background: 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 16, padding: '6px 12px', color: '#fff', cursor: 'pointer', fontSize: 12 }}>
           Refresh
         </button>
         {sessions.map((s) => (
@@ -101,8 +101,8 @@ export const SessionReplay: React.FC<SessionReplayProps> = ({ apiBase }) => {
             onClick={() => loadSession(s.id)}
             style={{
               background: selectedSession === s.id ? 'rgba(124,58,237,0.4)' : 'rgba(30,30,46,0.6)',
-              border: '1px solid rgba(139,92,246,0.2)', borderRadius: 8, padding: '6px 10px',
-              color: '#e5e7eb', cursor: 'pointer', fontSize: 10,
+              border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '6px 10px',
+              color: '#f8fafc', cursor: 'pointer', fontSize: 11,
             }}
           >
             {s.object_label} ({s.frame_count}f)
@@ -112,7 +112,7 @@ export const SessionReplay: React.FC<SessionReplayProps> = ({ apiBase }) => {
       {selectedSession && totalFrames > 0 && (
         <>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-            <button onClick={togglePlay} style={{ background: playing ? '#ef4444' : 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 8, padding: '6px 14px', color: '#fff', cursor: 'pointer', fontSize: 11 }}>
+            <button onClick={togglePlay} style={{ background: playing ? '#ef4444' : 'linear-gradient(90deg,#8b5cf6,#a855f7)', border: 'none', borderRadius: 16, padding: '6px 14px', color: '#fff', cursor: 'pointer', fontSize: 12 }}>
               {playing ? '⏸ Pause' : '▶ Play'}
             </button>
             <input
@@ -120,10 +120,10 @@ export const SessionReplay: React.FC<SessionReplayProps> = ({ apiBase }) => {
               onChange={(e) => loadFrame(Number(e.target.value))}
               style={{ flex: 1, accentColor: '#8b5cf6' }}
             />
-            <span style={{ fontSize: 11, color: '#9ca3af', minWidth: 60 }}>Frame {frameIndex + 1}/{totalFrames}</span>
+            <span style={{ fontSize: 12, color: '#94a3b8', minWidth: 60 }}>Frame {frameIndex + 1}/{totalFrames}</span>
           </div>
           {frame && (
-            <div style={{ fontSize: 11, color: '#d1d5db', background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: 8 }}>
+            <div style={{ fontSize: 12, color: '#e2e8f0', background: 'rgba(0,0,0,0.3)', borderRadius: 16, padding: 10 }}>
               <div>Phase: <strong>{frame.phase}</strong> | t: {frame.t_ms} ms | Force: {frame.applied_force_n} N</div>
               <div>Gating: {frame.gating_decision} | Uncertainty: {(frame.uncertainty_score * 100).toFixed(1)}%</div>
             </div>
@@ -132,14 +132,14 @@ export const SessionReplay: React.FC<SessionReplayProps> = ({ apiBase }) => {
             <a
               href={`${apiBase}/api/v1/sessions/${selectedSession}/export`}
               download={`session_${selectedSession}.json`}
-              style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, padding: '6px 12px', color: '#c4b5fd', cursor: 'pointer', fontSize: 11, textDecoration: 'none', display: 'inline-block' }}
+              style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 16, padding: '6px 12px', color: '#c4b5fd', cursor: 'pointer', fontSize: 12, textDecoration: 'none', display: 'inline-block' }}
             >
               📥 Export JSON
             </a>
             <a
               href={`${apiBase}/api/v1/sessions/${selectedSession}/export/csv`}
               download={`session_${selectedSession}.csv`}
-              style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, padding: '6px 12px', color: '#c4b5fd', cursor: 'pointer', fontSize: 11, textDecoration: 'none', display: 'inline-block' }}
+              style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 16, padding: '6px 12px', color: '#c4b5fd', cursor: 'pointer', fontSize: 12, textDecoration: 'none', display: 'inline-block' }}
             >
               📊 Export CSV
             </a>
@@ -147,7 +147,7 @@ export const SessionReplay: React.FC<SessionReplayProps> = ({ apiBase }) => {
         </>
       )}
       {sessions.length === 0 && (
-        <div style={{ fontSize: 11, color: '#9ca3af', textAlign: 'center', padding: 12 }}>
+        <div style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', padding: 12 }}>
           No sessions recorded. Start a live stream to begin logging.
         </div>
       )}

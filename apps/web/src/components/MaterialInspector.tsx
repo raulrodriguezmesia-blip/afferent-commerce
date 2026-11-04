@@ -27,7 +27,7 @@ export default function MaterialInspector({ materialProfile, physical }: Props) 
       <div className="row"><span>Safety Margin</span><strong>{Number(margin).toFixed(1)} %</strong></div>
 
       <div style={{ marginTop: 16 }}>
-        <div style={{ fontSize: 11, color: 'var(--sub)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        <div style={{ fontSize: 12, color: 'var(--sub)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           Stress Distribution (peak {maxStress.toFixed(1)} kPa)
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 2, height: 80 }}>
@@ -48,7 +48,7 @@ export default function MaterialInspector({ materialProfile, physical }: Props) 
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <div style={{ fontSize: 11, color: 'var(--sub)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        <div style={{ fontSize: 12, color: 'var(--sub)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           Safety Margin Bar
         </div>
         <div style={{ height: 10, background: 'var(--border)', borderRadius: 999, overflow: 'hidden' }}>

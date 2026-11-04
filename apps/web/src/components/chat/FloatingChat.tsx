@@ -3,11 +3,10 @@ import { MessageSquare, X, Send, Bot, User, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useToast } from '../ui/Toaster';
 
 interface FloatingChatProps {
   isOpen: boolean;
-  onClose: () => void;
+  onToggle: () => void;
 }
 
 interface Message {
@@ -16,15 +15,14 @@ interface Message {
   type?: 'message' | 'typing' | 'thought';
 }
 
-export default function FloatingChat({ isOpen, onClose }: FloatingChatProps) {
+export default function FloatingChat({ isOpen, onToggle }: FloatingChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [connected, setConnected] = useState(false);
   const ws = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { addToast } = useToast();
 
   const connectWS = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) return;
@@ -90,7 +88,7 @@ export default function FloatingChat({ isOpen, onClose }: FloatingChatProps) {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => onClose()}
+        onClick={onToggle}
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-2xl shadow-blue-600/30 flex items-center justify-center z-50"
       >
         {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
@@ -132,12 +130,8 @@ export default function FloatingChat({ isOpen, onClose }: FloatingChatProps) {
                   }`}>
                     {message.role === 'user' ? <User size={16} className="text-slate-600" /> : <Bot size={16} className="text-white" />}
                   </div>
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                    message.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-tr-sm'
-                      : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm'
-                  }`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-sm max-w-none">
+                  <div className="prose prose-sm max-w-none text-slate-800 dark:text-slate-200">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {message.content}
                     </ReactMarkdown>
                   </div>
