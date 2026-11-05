@@ -27,13 +27,7 @@ export default function App() {
 
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/80 border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-            <img src="/logo.svg" alt="Afferent Commerce" className="h-10 w-auto" />
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-white">Afferent Commerce</h1>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">
-              Agentic Settlement Intelligence
-            </p>
-          </div>
+          <img src="/logo.svg" alt="Afferent Commerce" className="h-10 w-auto" />
         </div>
         <nav className="flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-white/10 backdrop-blur-md">
           {TABS.map((tab) => (
