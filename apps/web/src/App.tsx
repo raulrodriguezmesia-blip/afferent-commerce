@@ -27,15 +27,15 @@ export default function App() {
 
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/80 border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <img src="/logo.svg" alt="Afferent Commerce" className="h-20 w-auto" />
+          <img src="/logo.svg" alt="Afferent Commerce" className="h-10 w-auto" />
         </div>
-        <nav className="flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-white/8 backdrop-blur-md">
+        <nav className="flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-white/10 backdrop-blur-md">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
-                activeTab === tab.id ? 'bg-indigo-900 text-white shadow-lg scale-105' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg scale-105' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
               }`}
             >
               <tab.Icon size={14} />
