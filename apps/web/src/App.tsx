@@ -1,6 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { ShieldCheck } from 'lucide-react';
 import { TABS } from './components/ui/Tabs';
 import { SettlementWizard } from './pages/SettlementWizard';
 import { AnalyticsPage } from './pages/AnalyticsPage';
@@ -28,9 +27,7 @@ export default function App() {
 
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/80 border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-indigo-600/20 border border-indigo-500/30 shadow-[0_0_15px_rgba(79,70,229,0.2)]">
-            <ShieldCheck className="h-5 w-5 text-indigo-400" />
-          </div>
+            <img src="/logo.svg" alt="Afferent Commerce" className="h-10 w-auto" />
           <div>
             <h1 className="text-lg font-bold tracking-tight text-white">Afferent Commerce</h1>
             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">
