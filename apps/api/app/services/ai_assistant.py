@@ -1,6 +1,7 @@
 import os
 import httpx
 import asyncio
+import unicodedata
 from typing import Optional
 
 
@@ -10,27 +11,45 @@ class FinOpsAssistant:
         self.base_url = os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1/")
         self.model = os.getenv("NEBIUS_MODEL", "nvidia/nemotron-3-super-120b-a12b")
 
+    def _normalize(self, question: str) -> str:
+        return "".join(
+            char
+            for char in unicodedata.normalize("NFKD", question.lower())
+            if not unicodedata.combining(char)
+        )
+
     async def answer(self, question: str) -> str:
-        founder_keywords = ("vision", "especial", "proposito", "product founder", "que hace", "que hace especial")
-        if any(keyword in question.lower() for keyword in founder_keywords):
+        normalized = self._normalize(question)
+        founder_keywords = (
+            "vision",
+            "special",
+            "purpose",
+            "product founder",
+            "what does",
+            "what is",
+            "how does",
+            "system",
+            "project",
+            "afferent",
+            "que es",
+            "como funciona",
+            "que hace",
+            "especial",
+        )
+        if any(keyword in normalized for keyword in founder_keywords):
             return self._founder_vision_answer()
 
         context = """
-        Eres el FinOps Assistant de Afferent Commerce, una plataforma de Agentic Commerce con Quality-Gated Settlement para PayPal.
+        You are the FinOps Assistant for Afferent Commerce, an Agentic Commerce platform with Quality-Gated Settlement for PayPal.
 
-        Conoces:
-        - Flujo: Vision-to-Touch -> Quality Assessment -> PayPal Orders API v2 -> Settlement condicional
-        - MÃƒÂ©tricas: Revenue, AOV, Pending Payouts, Disputas prevenidas
-        - Riesgo: Fraud Detection, Idempotencia, Split Payments
-        - Cumplimiento: Audit Trail, PDF reports
+        You know:
+        - Flow: Vision-to-Touch -> Quality Assessment -> PayPal Orders API v2 -> Conditional Settlement
+        - Metrics: Revenue, AOV, Pending Payouts, Prevented Disputes
+        - Risk: Fraud Detection, Idempotency, Split Payments
+        - Compliance: Audit Trail, PDF reports
 
-        Responde de forma concisa, profesional y orientada a negocio. Usa markdown cuando convenga.
-        Siempre ofrece insights accionables.
-
-        Vision de producto (Product Founder):
-        Afferent Commerce no es solo una demo de componentes o scripts aislados; es la convergencia entre la fisica somatosensorial y la ejecucion financiera autonoma.
-        La excelencia tecnica (monorepo FastAPI/React, telemetria a 50 Hz y razonamiento multimodal con NVIDIA Nemotron) solo cobra sentido cuando resuelve un problema critico del mundo real.
-        Al delegar en el agente la decision condicional de pago en PayPal segun la calidad fisica del producto, transformamos una inspeccion de calidad compleja en un motor de comercio confiable y libre de fraude.
+        Respond concisely, professionally, and business-focused. Use markdown when helpful.
+        Always provide actionable insights.
         """
 
         if not self.api_key:
@@ -64,41 +83,58 @@ class FinOpsAssistant:
     def _founder_vision_answer(self) -> str:
         return (
             "## Product Vision\n\n"
-            "Afferent Commerce no es solo una demostracion de componentes o scripts aislados; "
-            "es la convergencia entre la fisica somatosensorial y la ejecucion financiera autonoma.\n\n"
-            "La excelencia tecnica (monorepo FastAPI/React, telemetria a 50 Hz y razonamiento multimodal "
-            "con NVIDIA Nemotron) solo cobra sentido cuando resuelve un problema critico del mundo real. "
-            "Al delegar en el agente la decision condicional de pago en PayPal segun la calidad fisica del "
-            "producto, transformamos una inspeccion de calidad compleja en un motor de comercio confiable y "
-            "libre de fraude."
+            "Afferent Commerce is not just a demo of isolated components or scripts; it is the convergence "
+            "between somatosensory physics and autonomous financial execution.\n\n"
+            "Technical excellence (FastAPI/React monorepo, 50 Hz telemetry, and multimodal reasoning with "
+            "NVIDIA Nemotron) only matters when it solves a critical real-world problem. By delegating the "
+            "conditional payment decision in PayPal to the agent based on the physical quality of the product, "
+            "we transform a complex quality inspection into a reliable, fraud-resistant commerce engine."
         )
 
     def _fallback_answer(self, question: str) -> str:
-        q = question.lower()
-        founder_keywords = (
-            "vision",
-            "especial",
-            "proposito",
-            "product founder",
-            "que hace",
-            "qué hace",
-            "que es",
-            "qué es",
-            "como funciona",
-            "cómo funciona",
-            "sistema",
-            "proyecto",
-            "affectent",
+        q = self._normalize(question)
+        if "revenue" in q or "sales" in q:
+            return (
+                "## Sales Analysis\n\n"
+                "Based on the dashboard:\n\n"
+                "- **Sandbox Revenue:** $128,430.00 (+12.5% vs previous period)\n"
+                "- **AOV:** $84.20\n"
+                "- **Approval Rate:** High thanks to Quality-Gated Settlement\n\n"
+                "**Recommendation:** Keep the quality threshold >= 70 to maximize approvals without increasing risk."
+            )
+        if "payout" in q or "payment" in q:
+            return (
+                "## Settlement Status\n\n"
+                "- **Completed:** Mostly through PayPal Orders API v2\n"
+                "- **Pending:** $12,100.50 under review\n"
+                "- **Blocked:** Below the quality threshold or fraud flags\n\n"
+                "**Tip:** Use `X-Idempotency-Key` in `settle-and-dispatch` to avoid duplicate captures."
+            )
+        if "risk" in q or "fraud" in q:
+            return (
+                "## Risk Detection\n\n"
+                "The system evaluates:\n"
+                "- **Quality** (<40 -> High risk)\n"
+                "- **Amount** (> $5000 -> Flag)\n"
+                "- **Telemetry anomalies**\n"
+                "- **Transaction velocity**\n\n"
+                "**Action:** Transactions with `risk_level: high` are blocked automatically."
+            )
+        if "split" in q or "fee" in q or "commission" in q:
+            return (
+                "## Split Payments\n\n"
+                "Current configuration: **5% platform / 95% merchant**\n\n"
+                "Example for $100.00:\n"
+                "- Platform fee: **$5.00**\n"
+                "- Merchant settlement: **$95.00**\n\n"
+                "The calculation is automatic in `settle-and-dispatch`."
+            )
+        return (
+            "## FinOps Assistant\n\n"
+            "I can help with:\n"
+            "- **Orders:** status, tracking, settlement\n"
+            "- **Finance:** revenue, AOV, pending payouts\n"
+            "- **Risk:** fraud, quality, anomalies\n"
+            "- **Compliance:** audit, traceability\n\n"
+            "Try asking: *'How is revenue today?'* or *'Which transactions are on hold?'*"
         )
-        if any(keyword in q for keyword in founder_keywords):
-            return self._founder_vision_answer()
-
-        if "revenue" in q or "ventas" in q:
-            return "## AnÃƒÂ¡lisis de Ventas\n\nBasado en el dashboard:\n\n- **Revenue Sandbox:** $128,430.00 (+12.5% vs periodo anterior)\n- **AOV:** $84.20\n- **Tasa de aprobaciÃƒÂ³n:** Alta gracias al Quality-Gated Settlement\n\n**RecomendaciÃƒÂ³n:** MantÃƒÂ©n el umbral de calidad >= 70 para maximizar aprobaciÃƒÂ³n sin incrementar riesgo."
-        if "payout" in q or "pago" in q:
-            return "## Estado de Liquidaciones\n\n- **Completados:** MayorÃƒÂ­a vÃƒÂ­a PayPal Orders API v2\n- **Pendientes:** $12,100.50 en revisiÃƒÂ³n\n- **Bloqueados:** Por debajo del umbral de calidad o flags de fraude\n\n**Tip:** Usa `X-Idempotency-Key` en `settle-and-dispatch` para evitar doble captura."
-        if "riesgo" in q or "fraud" in q:
-            return "## DetecciÃƒÂ³n de Riesgo\n\nEl sistema evalÃƒÂºa:\n- **Calidad** (<40 Ã¢â€ â€™ Alto riesgo)\n- **Monto** (> $5000 Ã¢â€ â€™ Flag)\n- **AnomalÃƒÂ­as de telemetrÃƒÂ­a**\n- **Velocidad de transacciones**\n\n**AcciÃƒÂ³n:** Transacciones con `risk_level: high` se bloquean automÃƒÂ¡ticamente."
-        if "split" in q or "comisiÃƒÂ³n" in q:
-            return "## Split Payments\n\nConfiguraciÃƒÂ³n actual: **5% plataforma / 95% vendedor**\n\nEjemplo $100.00:\n- ComisiÃƒÂ³n plataforma: **$5.00**\n- LiquidaciÃƒÂ³n vendedor: **$95.00**\n\nEl cÃƒÂ¡lculo es automÃƒÂ¡tico en `settle-and-dispatch`."
-        return "## FinOps Assistant\n\nPuedo ayudarte con:\n- **Ãƒâ€œrdenes:** Estado, seguimiento, liquidaciÃƒÂ³n\n- **Finanzas:** Revenue, AOV, payouts pendientes\n- **Riesgo:** Fraude, calidad, anomalÃƒÂ­as\n- **Cumplimiento:** AuditorÃƒÂ­a, trazabilidad\n\nPrueba preguntando: *'Ã‚Â¿CÃƒÂ³mo va el revenue hoy?'* o *'Ã‚Â¿QuÃƒÂ© transacciones estÃƒÂ¡n en hold?'*"

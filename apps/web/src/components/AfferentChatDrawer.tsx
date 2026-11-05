@@ -1,17 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Sparkles, Bot, User } from 'lucide-react';
 
 export const SYSTEM_FOUNDER_PROMPT = `
-Eres el copiloto agéntico de Afferent Commerce. Tu objetivo no es solo explicar código, sino transmitir la visión de un Product Founder:
+You are the agentic copilot of Afferent Commerce. Your goal is not only to explain code, but to communicate the vision of a Product Founder:
 
-- QUÉ HACE: Conecta la evaluación somatosensorial de productos físicos (telemetría táctil a 50 Hz con NVIDIA Nemotron) con la captura o retención condicional de fondos mediante la API v2 de PayPal Orders.
-- POR QUÉ IMPORTA: Elimina el fraude de calidad en e-commerce y cadenas de suministro B2B. Hace que la tecnología física compleja sea invisible para centrarse en el impacto financiero real.
-- TONO: Riguroso en lo técnico (módulo de Young, límites de cizallamiento, firmas acústico-friccionales), pero siempre enfocado en el valor comercial y la autonomía del agente.
+- WHAT IT DOES: It connects the somatosensory evaluation of physical products (50 Hz tactile telemetry with NVIDIA Nemotron) with conditional fund capture or retention through the PayPal Orders API v2.
+- WHY IT MATTERS: It eliminates quality fraud in e-commerce and B2B supply chains. It makes complex physical technology invisible so the focus stays on real financial impact.
+- TONE: Rigorous on the technical side (Young's modulus, shear limits, acoustic-friction signatures), but always focused on commercial value and agent autonomy.
 `;
 
-const FOUNDER_VISION_RESPONSE = `Afferent Commerce no es solo una demostración de componentes o scripts aislados; es la convergencia entre la física somatosensorial y la ejecución financiera autónoma.
+const FOUNDER_VISION_RESPONSE = `Afferent Commerce is not just a demo of isolated components or scripts; it is the convergence between somatosensory physics and autonomous financial execution.
 
-Como Product Founder, la visión fue clara: la excelencia técnica (nuestro monorepo en FastAPI/React, telemetría a 50 Hz y razonamiento multimodal con NVIDIA Nemotron) solo cobra sentido cuando resuelve un problema crítico del mundo real. Al delegar en el agente la decisión condicional de pago en PayPal según la calidad física del producto, transformamos una inspección de calidad compleja en un motor de comercio confiable y libre de fraude.`;
+As a Product Founder, the vision was clear: technical excellence (FastAPI/React monorepo, 50 Hz telemetry, and multimodal reasoning with NVIDIA Nemotron) only matters when it solves a critical real-world problem. By delegating the conditional payment decision in PayPal to the agent based on the physical quality of the product, we transform a complex quality inspection into a reliable, fraud-resistant commerce engine.`;
 
 interface Message {
   id: string;
@@ -39,15 +39,15 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
     {
       id: '1',
       sender: 'assistant',
-      text: 'Bienvenido al Centro de Mando de Afferent Commerce. He analizado la telemetr�a de la orden actual y estoy listo para recomendar la liquidaci�n. �Deseas que analice el riesgo ahora?',
+      text: 'Welcome to the Afferent Commerce Command Center. I have analyzed the current order telemetry and I am ready to recommend the settlement. Would you like me to assess the risk now?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
   const [suggestedFollowups, setSuggestedFollowups] = useState<string[]>([
-    '¿Qué significa el Módulo de Young?',
-    'Explica el Arco Reflejo Neuromórfico',
-    'Analizar espectrograma acústico',
-    '¿Cuál es la visión de producto de Afferent Commerce?'
+    'What does Young\'s Modulus mean?',
+    'Explain the Neuromorphic Reflex Arc',
+    'Analyze the acoustic spectrogram',
+    'What is the product vision of Afferent Commerce?'
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -60,7 +60,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
     const queryText = textToSend || input;
     if (!queryText.trim()) return;
 
-    const isFounderVisionQuestion = /visi[oó]n|especial|prop[oó]sito|product founder|qu[eé] hace/i.test(queryText);
+    const isFounderVisionQuestion = /visi[oÃƒÂ³]n|especial|prop[oÃƒÂ³]sito|product founder|qu[eÃƒÂ©] hace/i.test(queryText);
 
     if (isFounderVisionQuestion) {
       const userMsg: Message = {
@@ -82,9 +82,9 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
       setMessages((prev) => [...prev, userMsg, botMsg]);
       if (!textToSend) setInput('');
       setSuggestedFollowups([
-        '¿Qué significa el Módulo de Young?',
-        'Explica el Arco Reflejo Neuromórfico',
-        'Analizar espectrograma acústico',
+        'Ã‚Â¿QuÃƒÂ© significa el MÃƒÂ³dulo de Young?',
+        'Explica el Arco Reflejo NeuromÃƒÂ³rfico',
+        'Analizar espectrograma acÃƒÂºstico',
       ]);
       return;
     }
@@ -138,7 +138,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'assistant',
-        text: 'Error de conexión con el backend de Afferent-Omni Chat.',
+        text: 'Error de conexiÃƒÂ³n con el backend de Afferent-Omni Chat.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -227,7 +227,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
                         background: `${m.providerColor}20`, color: m.providerColor,
                         border: `1px solid ${m.providerColor}40`, fontWeight: 600,
                       }}>
-                        {m.provider === 'NVIDIA Nemotron' ? '⚡ NVIDIA Nemotron' : m.provider}
+                        {m.provider === 'NVIDIA Nemotron' ? 'Ã¢Å¡Â¡ NVIDIA Nemotron' : m.provider}
                       </span>
                     )}
                     <span style={{ fontSize: 9, opacity: 0.6 }}>{m.timestamp}</span>
@@ -245,7 +245,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#8b5cf6', animation: 'bounce 1s infinite' }} />
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#8b5cf6', animation: 'bounce 1s infinite 0.2s' }} />
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#8b5cf6', animation: 'bounce 1s infinite 0.4s' }} />
-                <span>Analizando telemetría somatosensorial...</span>
+                <span>Analizando telemetrÃƒÂ­a somatosensorial...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -255,14 +255,14 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
           {suggestedFollowups.length > 0 && (
             <div style={{ padding: '8px 12px', background: 'rgba(10,10,15,0.6)', borderTop: '1px solid rgba(139,92,246,0.1)', display: 'flex', gap: 6, overflowX: 'auto' }}>
               <button
-                onClick={() => handleSend('¿Cuál es la visión de producto de Afferent Commerce?')}
+                onClick={() => handleSend('Ã‚Â¿CuÃƒÂ¡l es la visiÃƒÂ³n de producto de Afferent Commerce?')}
                 style={{
                   background: 'rgba(88,28,135,0.4)', color: '#c4b5fd',
                   border: '1px solid rgba(139,92,246,0.3)', fontSize: 11,
                   padding: '4px 10px', borderRadius: 999, whiteSpace: 'nowrap', cursor: 'pointer',
                 }}
               >
-                💡 Visión del Producto (Product Founder)
+                💡 Product Vision (Product Founder)
               </button>
               {suggestedFollowups.map((chip, idx) => (
                 <button
@@ -287,7 +287,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Pregúntale al sistema..."
+              placeholder="PregÃƒÂºntale al sistema..."
               style={{
                 flex: 1, background: 'rgba(15,15,23,0.9)', border: '1px solid rgba(139,92,246,0.3)',
                 borderRadius: 16, padding: '8px 12px', fontSize: 12, color: '#fff', outline: 'none',

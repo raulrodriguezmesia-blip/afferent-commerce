@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bot, User, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -112,7 +112,7 @@ export default function FloatingChat({ isOpen, onToggle }: FloatingChatProps) {
                 <p className="font-semibold text-sm">FinOps AI Assistant</p>
                 <p className="text-xs text-blue-100 flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-                  {connected ? 'En línea' : 'Reconectando...'}
+                  {connected ? 'En lÃ­nea' : 'Reconectando...'}
                 </p>
               </div>
               <Sparkles size={18} className="text-yellow-300" />
@@ -156,11 +156,11 @@ export default function FloatingChat({ isOpen, onToggle }: FloatingChatProps) {
             <div className="px-4 pt-3">
               <button
                 type="button"
-                onClick={() => sendMessage(undefined, '¿Cuál es la visión de producto de Afferent Commerce?')}
+                onClick={() => sendMessage(undefined, 'Â¿CuÃ¡l es la visiÃ³n de producto de Afferent Commerce?')}
                 disabled={!connected}
                 className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                💡 Visión del Producto (Product Founder)
+                💡 Product Vision (Product Founder)
               </button>
             </div>
             <div className="border-t border-slate-200 p-4 bg-white">
