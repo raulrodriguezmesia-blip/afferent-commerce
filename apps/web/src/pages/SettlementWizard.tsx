@@ -13,6 +13,8 @@ import { KPICard } from '../components/ui/KPICard';
 import { PayPalRecommendationCard } from '../components/PayPalRecommendationCard';
 import { TransactionCenter } from '../components/TransactionCenter';
 import { BusinessImpactCard } from '../components/BusinessImpactCard';
+import { AIDecisionEvidence } from '../components/AIDecisionEvidence';
+import { IntelligenceStatusPanel } from '../components/IntelligenceStatusPanel';
 import { AIDecisionInsights } from '../components/AIDecisionInsights';
 import { DecisionTrace } from '../components/DecisionTrace';
 import { JudgeDemoMode } from '../components/JudgeDemoMode';
@@ -244,6 +246,10 @@ export function SettlementWizard({ activeTab }: SettlementWizardProps) {
         <KPICard title='Riesgo Operativo' value='Bajo' subtitle='stable' icon={AlertTriangle} color='bg-yellow-900/50 text-yellow-400' />
         <KPICard title='Tiempo de Liquidación' value='~2.4s' subtitle='down' icon={FileText} color='bg-blue-900/50 text-blue-400' />
       </div>
+
+      <AIDecisionEvidence />
+
+      <IntelligenceStatusPanel />
 
       <div className='bg-slate-900/60 border border-white/15 rounded-2xl p-6 backdrop-blur-xl shadow-2xl'>
         <div className='mb-6'>

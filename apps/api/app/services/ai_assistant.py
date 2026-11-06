@@ -35,6 +35,7 @@ class FinOpsAssistant:
             "como funciona",
             "que hace",
             "especial",
+            "why should this win",
         )
         if any(keyword in normalized for keyword in founder_keywords):
             return self._founder_vision_answer()
@@ -82,13 +83,10 @@ class FinOpsAssistant:
 
     def _founder_vision_answer(self) -> str:
         return (
-            "## Product Vision\n\n"
-            "Afferent Commerce is not just a demo of isolated components or scripts; it is the convergence "
-            "between somatosensory physics and autonomous financial execution.\n\n"
-            "Technical excellence (FastAPI/React monorepo, 50 Hz telemetry, and multimodal reasoning with "
-            "NVIDIA Nemotron) only matters when it solves a critical real-world problem. By delegating the "
-            "conditional payment decision in PayPal to the agent based on the physical quality of the product, "
-            "we transform a complex quality inspection into a reliable, fraud-resistant commerce engine."
+            "Every year millions of dollars move through B2B commerce before physical quality is verified.\n\n"
+            "Afferent Commerce transforms real quality evidence into trusted financial execution.\n\n"
+            "AI recommends. Humans approve. PayPal executes.\n\n"
+            "The result: Less fraud. Less dispute. More trust."
         )
 
     def _fallback_answer(self, question: str) -> str:

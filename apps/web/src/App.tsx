@@ -8,6 +8,7 @@ import { useOrders } from './hooks/useOrders';
 import { P0Cards } from './components/P0Cards';
 import { AgentObservabilityCenter } from './components/AgentObservabilityCenter';
 import { SystemHealthBoard } from './components/SystemHealthBoard';
+import { AgentStatusPanel } from './components/AgentStatusPanel';
 import { SettlementTimeline } from './components/SettlementTimeline';
 import FloatingChat from './components/chat/FloatingChat';
 import './styles/index.css';
@@ -55,6 +56,8 @@ export default function App() {
                 <AgentObservabilityCenter />
                 <div className="h-px bg-white/5 w-full" />
                 <SystemHealthBoard />
+                <div className="h-px bg-white/5 w-full" />
+                <AgentStatusPanel />
               </div>
             </aside>
 

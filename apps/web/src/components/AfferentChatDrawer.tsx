@@ -9,9 +9,13 @@ You are the agentic copilot of Afferent Commerce. Your goal is not only to expla
 - TONE: Rigorous on the technical side (Young's modulus, shear limits, acoustic-friction signatures), but always focused on commercial value and agent autonomy.
 `;
 
-const FOUNDER_VISION_RESPONSE = `Afferent Commerce is not just a demo of isolated components or scripts; it is the convergence between somatosensory physics and autonomous financial execution.
+export const FOUNDER_VISION_RESPONSE = `Every year millions of dollars move through B2B commerce before physical quality is verified.
 
-As a Product Founder, the vision was clear: technical excellence (FastAPI/React monorepo, 50 Hz telemetry, and multimodal reasoning with NVIDIA Nemotron) only matters when it solves a critical real-world problem. By delegating the conditional payment decision in PayPal to the agent based on the physical quality of the product, we transform a complex quality inspection into a reliable, fraud-resistant commerce engine.`;
+Afferent Commerce transforms real quality evidence into trusted financial execution.
+
+AI recommends. Humans approve. PayPal executes.
+
+The result: Less fraud. Less dispute. More trust.`;
 
 interface Message {
   id: string;
@@ -60,7 +64,7 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
     const queryText = textToSend || input;
     if (!queryText.trim()) return;
 
-    const isFounderVisionQuestion = /visi[oÃƒÂ³]n|especial|prop[oÃƒÂ³]sito|product founder|qu[eÃƒÂ©] hace/i.test(queryText);
+    const isFounderVisionQuestion = /visi[oó]n|especial|prop[oó]sito|product founder|qu[eé] hace|why should this win/i.test(queryText);
 
     if (isFounderVisionQuestion) {
       const userMsg: Message = {
@@ -255,14 +259,14 @@ export const AfferentChatDrawer: React.FC<AfferentChatDrawerProps> = ({ currentC
           {suggestedFollowups.length > 0 && (
             <div style={{ padding: '8px 12px', background: 'rgba(10,10,15,0.6)', borderTop: '1px solid rgba(139,92,246,0.1)', display: 'flex', gap: 6, overflowX: 'auto' }}>
               <button
-                onClick={() => handleSend('Ã‚Â¿CuÃƒÂ¡l es la visiÃƒÂ³n de producto de Afferent Commerce?')}
+                onClick={() => handleSend('Why should this win?')}
                 style={{
                   background: 'rgba(88,28,135,0.4)', color: '#c4b5fd',
                   border: '1px solid rgba(139,92,246,0.3)', fontSize: 11,
                   padding: '4px 10px', borderRadius: 999, whiteSpace: 'nowrap', cursor: 'pointer',
                 }}
               >
-                💡 Product Vision (Product Founder)
+                🏆 Why Should This Win?
               </button>
               {suggestedFollowups.map((chip, idx) => (
                 <button

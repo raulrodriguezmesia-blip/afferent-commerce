@@ -156,11 +156,11 @@ export default function FloatingChat({ isOpen, onToggle }: FloatingChatProps) {
             <div className="px-4 pt-3">
               <button
                 type="button"
-                onClick={() => sendMessage(undefined, 'Â¿CuÃ¡l es la visiÃ³n de producto de Afferent Commerce?')}
+                onClick={() => sendMessage(undefined, 'Why should this win?')}
                 disabled={!connected}
                 className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                💡 Product Vision (Product Founder)
+                🏆 Why Should This Win?
               </button>
             </div>
             <div className="border-t border-slate-200 p-4 bg-white">
