@@ -19,7 +19,7 @@
   <p><i>Watch the full architectural walkthrough and live cURL demonstrations</i></p>
   
   <a href="https://youtu.be/YLhMuEteLoE">
-    <img src="[https://img.youtube.com/vi/Sl3Q1dsk8DY/maxresdefault.jpg](https://youtu.be/YLhMuEteLoE)" alt="Afferent Commerce | PayPal AI Hackathon Demo" width="85%" style="border-radius: 8px;">
+    <img src="https://youtu.be/YLhMuEteLoE" alt="Afferent Commerce | PayPal AI Hackathon Demo" width="85%" style="border-radius: 8px;">
   </a>
 </div>
 
